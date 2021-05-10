@@ -284,7 +284,7 @@ expr:
         $$ = make_node(NODE_AFFECT, 2, $1, $3); 
     }
     | TOK_INTVAL{
-        $$ = make_node(NODE_INTVAL, 0, $1); //bizarre
+        $$ = make_node(NODE_INTVAL, 0, yyval.intval); //retourner la valeur
     }
     | TOK_TRUE{
         $$ = make_node(NODE_BOOLVAL, 0, 1);//renvoie direct si c vrai
@@ -311,12 +311,13 @@ paramprint:
             $$ = $1;
         }
         | TOK_STRING{
-            $$ = make_node(NODE_STRINGVAL, 0);        }
+            $$ = make_node(NODE_STRINGVAL, 0, yyval.strval);        
+        }
         ;
 
 ident:
     TOK_IDENT{
-        $$ = make_node(NODE_IDENT, 0);
+        $$ = make_node(NODE_IDENT, 0, yyval.strval); //renvoyer la valeur de l'étiquette
     }
     ;
 
