@@ -114,18 +114,15 @@ vardecl:
 type:
     TOK_INT
     {
-        $$ = make_node(NODE_TYPE, 2, NULL, $1);
-        *program_root = $$;
+        $$ = make_node(NODE_TYPE, 0, TYPE_INT);
     }
     | TOK_BOOL
     {
-        $$ = make_node(NODE_TYPE, 2, NULL, $1);
-        *program_root = $$;
+        $$ = make_node(NODE_TYPE, 0, TYPE_BOOL);
     }
     | TOK_VOID
     {
-        $$ = make_node(NODE_TYPE, 2, NULL, $1);
-        *program_root = $$;
+        $$ = make_node(NODE_TYPE, 0, TYPE_VOID);
     }
     ;
 
@@ -157,31 +154,34 @@ maindecl:
 listint:
         listinstnonnull
         {
-            $$ = make_node(NODE_LIST, 2, NULL, $1);
-            *program_root = $$;
+            $$ = $1;
+        }
+        |
+        {
+            $$ = NULL;
         }
         ;
 listinstnonnull:
             inst
             {
-
+                $$ = $1;
             }
             | listinstnonnull inst
             {
-
+                $$ = make_node(NODE_LIST, 2, $1, $2);
             }
             ;
 
 inst:
     expr TOK_SEMICOL
     {
-        $$ = $1; //verif logique
+        $$ = $1; 
     }
     | TOK_IF TOK_LPAR expr TOK_RPAR inst TOK_ELSE inst{
-        $$ = make_node(NODE_IF, 2, $3, $5);
+        $$ = make_node(NODE_IF, 3, $3, $5, $7);
     }
     | TOK_IF TOK_LPAR expr TOK_RPAR inst %prec TOK_THEN{
-        $$ = make_node(NODE_IF, 3, $3, $5, $6); //pas sur
+        $$ = make_node(NODE_IF, 2, $3, $5); 
     }
     | TOK_WHILE TOK_LPAR expr TOK_RPAR inst{
         $$ = make_node(NODE_WHILE, 2, $3, $5);
@@ -196,7 +196,7 @@ inst:
         $$ = $1;
     }
     | TOK_SEMICOL{
-        $$ = make_node(NODE_INTVAL, 3, $1, $3); //pas sûr
+        $$ = NULL; 
     }
     | TOK_PRINT TOK_LPAR listparamprint TOK_RPAR TOK_SEMICOL{
         $$ = make_node(NODE_PRINT, 0, $3);
@@ -232,7 +232,7 @@ expr:
         $$ = make_node(NODE_GT, 2, $1, $3);
     }
     | TOK_MINUS expr %prec TOK_UMINUS{
-         $$ = make_node(NODE_UMINUS, 1, $1); //token spécial
+         $$ = make_node(NODE_UMINUS, 1, $2); //token spécial
     }
     | expr TOK_GE expr{
          $$ = make_node(NODE_GE, 2, $1, $3);
