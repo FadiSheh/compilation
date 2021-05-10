@@ -341,6 +341,7 @@ node_t make_node(node_nature nature, int nops, ...) {
 
     node->nops=nops;
     node->nature = nature;
+    node->lineno = yylineno;
 
     switch(node->nature){
 
