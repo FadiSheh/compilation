@@ -89,13 +89,240 @@ program:
         }
         ;
 
+listdecl:
+         listdeclnonnull
+         {
+            $$ = make_node(NODE_LIST, 2, NULL, $1);
+            *program_root = $$;
+
+         }
+         ;
+
 listdeclnonnull:
+        vardecl
             { $$ = NULL; }
         ;
 
+vardecl:
+        type listtypedecl TOK_SEMICOL
+        {
+            $$ = make_node(NODE_PROGRAM, 2, $1, $2); //jaurais pas mis NODE_PROGRAM mais lequel .....?????????
+            *program_root = $$;
+        }
+        ;
+
+type:
+    TOK_INT
+    {
+        $$ = make_node(NODE_TYPE, 2, NULL, $1);
+        *program_root = $$;
+    }
+    | TOK_BOOL
+    {
+        $$ = make_node(NODE_TYPE, 2, NULL, $1);
+        *program_root = $$;
+    }
+    | TOK_VOID
+    {
+        $$ = make_node(NODE_TYPE, 2, NULL, $1);
+        *program_root = $$;
+    }
+    ;
+
+listtypedecl:
+            decl{
+
+            }
+            | listtypedecl TOK_COMMA decl
+            {
+
+            }
+            ;
+
+decl:
+    ident{
+
+    }
+    | ident TOK_AFFECT expr
+    {
+
+    }
+    ;
+
 maindecl:
+        type ident TOK_LPAR TOK_RPAR block
             { $$ = NULL; }
         ;
+
+listint:
+        listinstnonnull
+        {
+            $$ = make_node(NODE_LIST, 2, NULL, $1);
+            *program_root = $$;
+        }
+        ;
+listinstnonnull:
+            inst
+            {
+
+            }
+            | listinstnonnull inst
+            {
+
+            }
+            ;
+
+inst:
+    expr TOK_SEMICOL
+    {
+
+    }
+    | TOK_IF TOK_LPAR expr TOK_RPAR inst TOK_ELSE inst{
+
+    }
+    | TOK_IF TOK_LPAR expr TOK_RPAR inst %prec TOK_THEN{
+
+    }
+    | TOK_WHILE TOK_LPAR expr TOK_RPAR inst{
+
+    }
+    | TOK_FOR TOK_LPAR expr TOK_SEMICOL expr TOK_SEMICOL expr TOK_RPAR inst{
+
+    }
+    | TOK_DO inst TOK_WHILE TOK_LPAR expr TOK_RPAR TOK_SEMICOL{
+
+    }
+    | block{
+
+    }
+    | TOK_SEMICOL{
+
+    }
+    | TOK_PRINT TOK_LPAR listparamprint TOK_RPAR TOK_SEMICOL{
+
+    }
+    ;
+
+block:
+    TOK_LACC listdecl listinst TOK_RACC{
+
+    }
+    ;
+
+expr:
+    expr TOK_MUL expr{
+        $$ = make_node(NODE_MUL, 3, $1, $3);
+    }
+    | expr TOK_DIV expr{
+        $$ = make_node(NODE_DIV, 3, $1, $3);
+    }
+    | expr TOK_PLUS expr{
+        $$ = make_node(NODE_PLUS, 3, $1, $3);
+    }
+    | expr TOK_MINUS expr{
+        $$ = make_node(NODE_MINUS, 3, $1, $3);
+    }
+    | expr TOK_MOD expr{
+        $$ = make_node(NODE_MOD, 3, $1, $3);
+    }
+    | expr TOK_LT expr{
+        $$ = make_node(NODE_LT, 3, $1, $3); //reprendre à partir de là
+    }
+    | expr TOK_GT expr{
+        $$ = make_node(NODE_GT, 3, $1, $3);
+    }
+    | TOK_MINUS expr %prec TOK_UMINUS{
+         $$ = make_node(NODE_MINUS, 3, $1, $3); //IDK
+    }
+    | expr TOK_GE expr{
+         $$ = make_node(NODE_GE, 2, NULL, $1);
+    }
+    | expr TOK_LE expr{
+        $$ = make_node(NODE_LE, 2, NULL, $1);
+    }
+    | expr TOK_EQ expr{
+        $$ = make_node(NODE_EQ, 2, NULL, $1);
+    }
+    | expr TOK_NE expr{
+        $$ = make_node(NODE_NE, 2, NULL, $1);
+    }
+    | expr TOK_AND expr{
+        $$ = make_node(NODE_AND, 2, NULL, $1);
+    }
+    | expr TOK_OR expr{
+        $$ = make_node(NODE_OR, 2, NULL, $1);
+    }
+    | expr TOK_BAND expr{
+        $$ = make_node(NODE_BAND, 2, NULL, $1);
+    }
+    | expr TOK_BOR expr{
+        $$ = make_node(NODE_BOR, 2, NULL, $1);
+    }
+    | expr TOK_BXOR expr{
+    
+    }
+    | expr TOK_SRL expr{
+    
+    }
+    | expr TOK_SRA expr{
+    
+    }
+    | expr TOK_SLL expr{
+    
+    }
+    | TOK_NOT expr{
+    
+    }
+    | TOK_BNOT expr{
+    
+    }
+    | TOK_LPAR expr TOK_RPAR{
+    
+    }
+    | ident TOK_AFFECT expr{
+    
+    }
+    | TOK_INTVAL{
+    
+    }
+    | TOK_TRUE{
+    
+    }
+    | TOK_FALSE{
+    
+    }
+    | ident{
+    
+    }
+    ;
+
+listparamprint:
+            listparamprint TOK_COMMA paramprint{
+
+            }
+            | paramprint{
+
+            }
+            ;
+
+paramprint:
+        ident{
+
+        }
+        | TOK_STRING{
+
+        }
+        ;
+
+ident:
+    TOK_IDENT{
+
+    }
+    ;
+
+
+
+
 
 
 %%

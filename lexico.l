@@ -1,10 +1,14 @@
 %{
+#define Return(X) {\
+	printf("line %d, token " #X "\n", yylineno);\
+	return X;\
+}
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
 
 #include "defs.h"
-//#include "common.h"
+#include "common.h"
 
 #include "y.tab.h"
 
@@ -31,74 +35,74 @@ LETTRE          [a-zA-Z]
 CHIFFRE			[0-9]
 IDF             {LETTRE}(_|{LETTRE}|{CHIFFRE})*
 CHIFFRE_NON_NUL [1-9]
-ENTIER_DEC		[0] | {CHIFFRE_NON_NUL} {CHIFFRE}*
+ENTIER_DEC		[0]|{CHIFFRE_NON_NUL}{CHIFFRE}*
 LETTRE_HEXA 	[a-fA-F]
-ENTIER_HEXA		0[X|x]|[0-9A-F] 
-CHAINE_CAR		[ -!#-[]-DEL]
-ENTIER           {ENTIER_HEXA} | {ENTIER_DEC}
-CHAINE          '"' ({CHAINE_CAR} | '\n' | '\"') '"'
+ENTIER_HEXA		0[X|x]|[0-9A-F]+
+CHAINE_CAR		[^\042\134]
+ENTIER          {ENTIER_HEXA}|{ENTIER_DEC}
+CHAINE          \042({CHAINE_CAR}|\134|\\n)*\042
 COMMENTAIRE     \/\/.*
 
 %%
-
-"void"          return TOK_VOID;
-"for"			return TOK_FOR;
-"if"			return TOK_IF;
-"else"			return TOK_ELSE;
-"int"			return TOK_INT;
-"bool"			return TOK_BOOL;
-"true"			return TOK_TRUE;
-"false"			return TOK_FALSE;
-"while"			return TOK_WHILE;
-"do"			return TOK_DO;
-"print"			return TOK_PRINT;
-"("				return TOK_LPAR;
-")"				return TOK_RPAR;
-","				return TOK_COMMA;
-"{"				return TOK_LACC;
-"}"				return TOK_RACC;
-";" 			return TOK_SEMICOL;
-"+" 			return TOK_PLUS;
-"-"             return TOK_MINUS;
-"*"             return TOK_MUL;
-"/"             return TOK_DIV;
-"%"             return TOK_MOD;
-">"             return TOK_GT;
-"<"             return TOK_LT;
-"!"             return TOK_NOT;
-"~"             return TOK_BNOT;
-"&"             return TOK_BAND;
-"|"             return TOK_BOR;
-"^"             return TOK_BXOR;
-"="             return TOK_EQ;
-">>"            return TOK_;
-">>>"           return TOK_;
-"<<"            return TOK_;
-">="            return TOK_GE;
-"<="            return TOK_LE;
-"=="            return TOK_BE;
-"!="            return TOK_NE;
-"&&"            return TOK_AND;
-"||"            return TOK_OR;
+"void"  Return(TOK_VOID);
+"for"	Return(TOK_FOR);
+"if"	Return(TOK_IF);
+"else"	Return(TOK_ELSE);
+"int"	Return(TOK_INT);
+"bool"	Return(TOK_BOOL);
+"true"	Return(TOK_TRUE);
+"false" Return(TOK_FALSE);
+"while" Return(TOK_WHILE);
+"do"	Return(TOK_DO);
+"print"	Return(TOK_PRINT);
+"("		Return(TOK_LPAR);
+")"		Return(TOK_RPAR);
+","		Return(TOK_COMMA);
+"{"		Return(TOK_LACC);
+"}"		Return(TOK_RACC);
+";" 	Return(TOK_SEMICOL);
+"+" 	Return(TOK_PLUS);
+"-"     Return(TOK_MINUS);
+"*"     Return(TOK_MUL);
+"/"     Return(TOK_DIV);
+"%"     Return(TOK_MOD);
+">"     Return(TOK_GT);
+"<"     Return(TOK_LT);
+"!"     Return(TOK_NOT);
+"~"     Return(TOK_BNOT);
+"&"     Return(TOK_BAND);
+"|"     Return(TOK_BOR);
+"^"     Return(TOK_BXOR);
+"="     Return(TOK_AFFECT);
+">>"    Return(TOK_SRL);
+">>>"   Return(TOK_SRA);
+"<<"    Return(TOK_SLL);
+">="    Return(TOK_GE);
+"<="    Return(TOK_LE);
+"=="    Return(TOK_EQ);
+"!="    Return(TOK_NE);
+"&&"    Return(TOK_AND);
+"||"    Return(TOK_OR);
 
 {IDF} {
                 //yylval.strval = strdup(yytext);
-                return TOK_IDENT;
+                Return(TOK_IDENT);
 }
 
 {ENTIER} {
                 /* A completer : affecter yylval.intval et faire des verifications */
-				//yylval.intval = atoi(yytext); /*permet de transformer une chaine de caracteres en une donnee de type int*/
-                return TOK_INT;
+				yylval.intval = atoi(yytext); /*permet de transformer une chaine de caracteres en une donnee de type int*/
+                Return(TOK_INTVAL);
 }
 
 {CHAINE} {
                 /* A completer : affecter yylval.strval */
-				//yylval.strval = strdup(yytext);
-                return TOK_STRING;
+				yylval.strval = strdup(yytext);
+                Return(TOK_STRING);
 }
 
-{COMMENTAIRE} {			
+{COMMENTAIRE} {		
+				printf("TOK_COMMENTAIRE\n");	
 				return;
 }
 
@@ -117,7 +121,7 @@ int yywrap(void) {
     return 1;
 }
 
-/*
+
 int main(int argc, char ** argv) {
     node_t program_root;
     parse_args(argc, argv);
@@ -133,6 +137,6 @@ int main(int argc, char ** argv) {
     return 0;
 }
 
-*/
+
 
 
