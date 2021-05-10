@@ -284,7 +284,7 @@ expr:
         $$ = make_node(NODE_AFFECT, 2, $1, $3); 
     }
     | TOK_INTVAL{
-        $$ = make_node(NODE_INTVAL, 0, $1); //bizarre
+        $$ = make_node(NODE_INTVAL, 0, yyval.intval); //retourner la valeur
     }
     | TOK_TRUE{
         $$ = make_node(NODE_BOOLVAL, 0, 1);//renvoie direct si c vrai
@@ -311,14 +311,17 @@ paramprint:
             $$ = $1;
         }
         | TOK_STRING{
-            $$ = make_node(NODE_STRINGVAL, 0);        }
+            $$ = make_node(NODE_STRINGVAL, 0, yyval.strval);        
+        }
         ;
 
 ident:
     TOK_IDENT{
-        $$ = make_node(NODE_IDENT, 0);
+        $$ = make_node(NODE_IDENT, 0, yyval.strval); //renvoyer la valeur de l'étiquette
     }
     ;
+
+
 
 
 
@@ -327,21 +330,23 @@ ident:
 
 /* A completer et/ou remplacer avec d'autres fonctions */
 node_t make_node(node_nature nature, int nops, ...) {
-    node_t node;
+    node_t node = (node_t)malloc(sizeof(node_s));
+
+    //définir nombre d'arguments
+    node->nature = nature;
+    node->nops = nops;
+    node->lineno = yylineno;
+
     va_list ap;
     va_start(ap,nops);
-    node = (node_t)malloc(sizeof(node_s));
+
 
     node->opr=(node_t*)malloc(nops*sizeof(node_t));
     for (int i = 0; i<nops;i++){
         node -> opr[i]=va_arg(ap,node_t);
     }
     va_end(ap);
-    
 
-    node->nops=nops;
-    node->nature = nature;
-    node->lineno = yylineno;
 
     switch(node->nature){
 
@@ -427,9 +432,7 @@ node_t make_node(node_nature nature, int nops, ...) {
         case NODE_PRINT: 
         break;
     }
-
-
-
+    return NULL;
 }
 
 
