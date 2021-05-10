@@ -284,7 +284,7 @@ expr:
         $$ = make_node(NODE_AFFECT, 2, $1, $3); 
     }
     | TOK_INTVAL{
-        $$ = make_node(NODE_INTVAL, 0, yyval.intval); //retourner la valeur
+        $$ = make_node(NODE_INTVAL, 0, $1); //bizarre
     }
     | TOK_TRUE{
         $$ = make_node(NODE_BOOLVAL, 0, 1);//renvoie direct si c vrai
@@ -311,17 +311,14 @@ paramprint:
             $$ = $1;
         }
         | TOK_STRING{
-            $$ = make_node(NODE_STRINGVAL, 0, yyval.strval);        
-        }
+            $$ = make_node(NODE_STRINGVAL, 0);        }
         ;
 
 ident:
     TOK_IDENT{
-        $$ = make_node(NODE_IDENT, 0, yyval.strval); //renvoyer la valeur de l'étiquette
+        $$ = make_node(NODE_IDENT, 0);
     }
     ;
-
-
 
 
 
@@ -330,9 +327,111 @@ ident:
 
 /* A completer et/ou remplacer avec d'autres fonctions */
 node_t make_node(node_nature nature, int nops, ...) {
+    node_t* node;
     va_list ap;
+    va_start(ap,nops);
 
-    return NULL;
+    for (int i = 0; i<nops;i++){
+        node -> opr[i]=va_arg(ap,node_t*);
+    }
+    va_end(ap);
+    
+    node = malloc(sizeof(node_t));
+
+    node->nops=nops;
+    node->node_nature = nature;
+
+    switch(node->node_nature){
+
+        case NONE: 
+
+        break;
+        case NODE_PROGRAM: 
+        break;
+        case NODE_BLOCK: 
+        break;
+        case NODE_LIST: 
+        break;
+        case NODE_DECLS: 
+        break;
+        case NODE_DECL: 
+        break;
+        case NODE_IDENT: 
+        break;
+        case NODE_TYPE: 
+        break;
+        case NODE_INTVAL: 
+        break;
+        case NODE_BOOLVAL: 
+        break;
+        case NODE_STRINGVAL: 
+        break;
+        case NODE_FUNC: 
+        break;
+        case NODE_IF: 
+        break;
+        case NODE_WHILE: 
+        break;
+        case NODE_FOR: 
+        break;
+        case NODE_DOWHILE: 
+        break;
+        case NODE_PLUS: 
+        break;
+        case NODE_MINUS: 
+        break;
+        case NODE_MUL: 
+        break;
+        case NODE_DIV: 
+        break;
+        case NODE_MOD: 
+        break;
+        case NODE_LT: 
+        break;
+        case NODE_GT: 
+        break;
+        case NODE_LE: 
+        break;
+        case NODE_GE: 
+        break;
+        case NODE_EQ: 
+        break;
+        case NODE_NE: 
+        break;
+        case NODE_AND: 
+        break;
+        case NODE_OR: 
+        break;
+        case NODE_BAND: 
+        break;
+        case NODE_BOR: 
+        break;
+        case NODE_BXOR: 
+        break;
+        case NODE_NOT: 
+        break;
+        case NODE_BNOT: 
+        break;
+        case NODE_SLL: 
+        break;
+        case NODE_SRA: 
+        break;
+        case NODE_SRL: 
+        break;
+        case NODE_UMINUS: 
+        break;
+        case NODE_AFFECT: 
+        break;
+        case NODE_PRINT: 
+        break;
+    }
+
+
+//1er argument token  nombre dinvocations expr 1 expr2
+node_nature nature;
+    node_type type;
+
+
 }
 
 
