@@ -327,21 +327,22 @@ ident:
 
 /* A completer et/ou remplacer avec d'autres fonctions */
 node_t make_node(node_nature nature, int nops, ...) {
-    node_t* node;
+    node_t node;
     va_list ap;
     va_start(ap,nops);
+    node = (node_t)malloc(sizeof(node_s));
 
+    node->opr=(node_t*)malloc(nops*sizeof(node_t));
     for (int i = 0; i<nops;i++){
-        node -> opr[i]=va_arg(ap,node_t*);
+        node -> opr[i]=va_arg(ap,node_t);
     }
     va_end(ap);
     
-    node = malloc(sizeof(node_t));
 
     node->nops=nops;
-    node->node_nature = nature;
+    node->nature = nature;
 
-    switch(node->node_nature){
+    switch(node->nature){
 
         case NONE: 
 
@@ -426,10 +427,6 @@ node_t make_node(node_nature nature, int nops, ...) {
         break;
     }
 
-
-//1er argument token  nombre dinvocations expr 1 expr2
-node_nature nature;
-    node_type type;
 
 
 }
