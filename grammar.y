@@ -128,21 +128,21 @@ type:
 
 listtypedecl:
             decl{
-
+                $$ = $1;
             }
             | listtypedecl TOK_COMMA decl
             {
-
+                $$ = make_node(NODE_LIST, 2, $1,$3);
             }
             ;
 
 decl:
     ident{
-
+        $$ = $1;
     }
     | ident TOK_AFFECT expr
     {
-
+        $$ = make_node(NODE_AFFECT, 2, $1, $3);
     }
     ;
 
@@ -151,7 +151,7 @@ maindecl:
             { $$ = NULL; }
         ;
 
-listint:
+listinst:
         listinstnonnull
         {
             $$ = $1;
@@ -161,6 +161,7 @@ listint:
             $$ = NULL;
         }
         ;
+
 listinstnonnull:
             inst
             {

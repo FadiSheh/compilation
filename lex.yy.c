@@ -779,7 +779,7 @@ YY_DECL
 		}
 
 	{
-#line 47 "lexico.l"
+#line 46 "lexico.l"
 
 #line 785 "lex.yy.c"
 
@@ -850,202 +850,202 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 48 "lexico.l"
+#line 47 "lexico.l"
 Return(TOK_VOID);
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 49 "lexico.l"
+#line 48 "lexico.l"
 Return(TOK_FOR);
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 50 "lexico.l"
+#line 49 "lexico.l"
 Return(TOK_IF);
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 51 "lexico.l"
+#line 50 "lexico.l"
 Return(TOK_ELSE);
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 52 "lexico.l"
+#line 51 "lexico.l"
 Return(TOK_INT);
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 53 "lexico.l"
+#line 52 "lexico.l"
 Return(TOK_BOOL);
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 54 "lexico.l"
+#line 53 "lexico.l"
 Return(TOK_TRUE);
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 55 "lexico.l"
+#line 54 "lexico.l"
 Return(TOK_FALSE);
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 56 "lexico.l"
+#line 55 "lexico.l"
 Return(TOK_WHILE);
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 57 "lexico.l"
+#line 56 "lexico.l"
 Return(TOK_DO);
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 58 "lexico.l"
+#line 57 "lexico.l"
 Return(TOK_PRINT);
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 59 "lexico.l"
+#line 58 "lexico.l"
 Return(TOK_LPAR);
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 60 "lexico.l"
+#line 59 "lexico.l"
 Return(TOK_RPAR);
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 61 "lexico.l"
+#line 60 "lexico.l"
 Return(TOK_COMMA);
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 62 "lexico.l"
+#line 61 "lexico.l"
 Return(TOK_LACC);
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 63 "lexico.l"
+#line 62 "lexico.l"
 Return(TOK_RACC);
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 64 "lexico.l"
+#line 63 "lexico.l"
 Return(TOK_SEMICOL);
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 65 "lexico.l"
+#line 64 "lexico.l"
 Return(TOK_PLUS);
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 66 "lexico.l"
+#line 65 "lexico.l"
 Return(TOK_MINUS);
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 67 "lexico.l"
+#line 66 "lexico.l"
 Return(TOK_MUL);
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 68 "lexico.l"
+#line 67 "lexico.l"
 Return(TOK_DIV);
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 69 "lexico.l"
+#line 68 "lexico.l"
 Return(TOK_MOD);
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 70 "lexico.l"
+#line 69 "lexico.l"
 Return(TOK_GT);
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 71 "lexico.l"
+#line 70 "lexico.l"
 Return(TOK_LT);
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 72 "lexico.l"
+#line 71 "lexico.l"
 Return(TOK_NOT);
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 73 "lexico.l"
+#line 72 "lexico.l"
 Return(TOK_BNOT);
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 74 "lexico.l"
+#line 73 "lexico.l"
 Return(TOK_BAND);
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 75 "lexico.l"
+#line 74 "lexico.l"
 Return(TOK_BOR);
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 76 "lexico.l"
+#line 75 "lexico.l"
 Return(TOK_BXOR);
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 77 "lexico.l"
+#line 76 "lexico.l"
 Return(TOK_AFFECT);
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 78 "lexico.l"
+#line 77 "lexico.l"
 Return(TOK_SRL);
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 79 "lexico.l"
+#line 78 "lexico.l"
 Return(TOK_SRA);
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 80 "lexico.l"
+#line 79 "lexico.l"
 Return(TOK_SLL);
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 81 "lexico.l"
+#line 80 "lexico.l"
 Return(TOK_GE);
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 82 "lexico.l"
+#line 81 "lexico.l"
 Return(TOK_LE);
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 83 "lexico.l"
+#line 82 "lexico.l"
 Return(TOK_EQ);
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 84 "lexico.l"
+#line 83 "lexico.l"
 Return(TOK_NE);
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 85 "lexico.l"
+#line 84 "lexico.l"
 Return(TOK_AND);
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 86 "lexico.l"
+#line 85 "lexico.l"
 Return(TOK_OR);
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 88 "lexico.l"
+#line 87 "lexico.l"
 {
                 //yylval.strval = strdup(yytext);
                 Return(TOK_IDENT);
@@ -1053,7 +1053,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 93 "lexico.l"
+#line 92 "lexico.l"
 {
                 /* A completer : affecter yylval.intval et faire des verifications */
 				yylval.intval = atoi(yytext); /*permet de transformer une chaine de caracteres en une donnee de type int*/
@@ -1063,16 +1063,16 @@ YY_RULE_SETUP
 case 42:
 /* rule 42 can match eol */
 YY_RULE_SETUP
-#line 99 "lexico.l"
+#line 98 "lexico.l"
 {
                 /* A completer : affecter yylval.strval */
-				yylval.strval = strdup(yytext+1);
+				yylval.strval = strdup(yytext);
                 Return(TOK_STRING);
 }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 105 "lexico.l"
+#line 104 "lexico.l"
 {		
 				printf("TOK_COMMENTAIRE\n");	
 				return;
@@ -1081,12 +1081,12 @@ YY_RULE_SETUP
 case 44:
 /* rule 44 can match eol */
 YY_RULE_SETUP
-#line 111 "lexico.l"
+#line 110 "lexico.l"
 
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 113 "lexico.l"
+#line 112 "lexico.l"
 {
                 fprintf(stderr, "Error line %d: Lexical error\n", yylineno);
                 exit(1);
@@ -1094,7 +1094,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 119 "lexico.l"
+#line 118 "lexico.l"
 ECHO;
 	YY_BREAK
 #line 1101 "lex.yy.c"
@@ -2114,7 +2114,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 119 "lexico.l"
+#line 118 "lexico.l"
 
 
 int yywrap(void) {
