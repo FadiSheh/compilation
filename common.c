@@ -206,6 +206,7 @@ const char * node_nature2string(node_nature t) {
         case NODE_STRINGVAL:
             return "STRINGVAL";
         case NODE_FUNC:
+            //printf("!! il y a un FUNC !!\n");
             return "FUNC";
         case NODE_IF:
             return "IF";

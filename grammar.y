@@ -43,9 +43,9 @@ node_t make_node(node_nature nature, int nops, ...);
 
 /* Definir les token ici avec leur associativite, dans le bon ordre */
 %token TOK_VOID TOK_INT TOK_INTVAL TOK_BOOL TOK_TRUE TOK_FALSE
-%token TOK_IDENT   TOK_IF       TOK_ELSE    TOK_WHILE  TOK_FOR   TOK_PRINT
-%token TOK_SEMICOL TOK_COMMA    TOK_LPAR    TOK_RPAR   TOK_LACC  TOK_RACC
-%token TOK_STRING  TOK_DO
+%token TOK_IDENT TOK_IF TOK_ELSE TOK_WHILE TOK_FOR TOK_PRINT
+%token TOK_SEMICOL TOK_COMMA TOK_LPAR TOK_RPAR TOK_LACC TOK_RACC
+%token TOK_STRING TOK_DO
 
 /* A completer */
 
@@ -64,8 +64,6 @@ node_t make_node(node_nature nature, int nops, ...);
 %left TOK_PLUS TOK_MINUS
 %left TOK_MUL TOK_DIV TOK_MOD
 %left TOK_UMINUS TOK_NOT TOK_BNOT
-
-
 
 %type <intval> TOK_INTVAL;
 %type <strval> TOK_IDENT TOK_STRING;
@@ -92,21 +90,29 @@ program:
 listdecl:
          listdeclnonnull
          {
-            $$ = make_node(NODE_LIST, 2, NULL, $1);
+            $$ = $1;//make_node(NODE_LIST, 2, NULL, $1);
             //*program_root = $$;
 
+         }
+         |
+         {
+            $$ = NULL;
          }
          ;
 
 listdeclnonnull:
         vardecl
-            { $$ = NULL; }
+            { $$ = $1; }
+        | listdeclnonnull vardecl
+        {
+            $$ = make_node(NODE_LIST, 2, $1, $2);
+        }
         ;
 
 vardecl:
         type listtypedecl TOK_SEMICOL
         {
-            $$ = make_node(NODE_DECL, 2, $1, $2); //jaurais pas mis NODE_PROGRAM mais lequel .....?????????
+            $$ = make_node(NODE_DECLS, 2, $1, $2); 
             //*program_root = $$;
         }
         ;
@@ -138,17 +144,19 @@ listtypedecl:
 
 decl:
     ident{
-        $$ = $1;
+        $$ = make_node(NODE_DECL, 2, $1, NULL);
     }
     | ident TOK_AFFECT expr
     {
-        $$ = make_node(NODE_AFFECT, 2, $1, $3);
+        $$ = make_node(NODE_DECL, 2, $1, $3);
     }
     ;
 
 maindecl:
         type ident TOK_LPAR TOK_RPAR block
-            { $$ = NULL; }
+        { 
+            $$ = make_node(NODE_FUNC, 3, $1, $2, $5); 
+        }
         ;
 
 listinst:
@@ -200,7 +208,7 @@ inst:
         $$ = NULL; 
     }
     | TOK_PRINT TOK_LPAR listparamprint TOK_RPAR TOK_SEMICOL{
-        $$ = make_node(NODE_PRINT, 0, $3);
+        $$ = make_node(NODE_PRINT, 1, $3);
     }
     ;
 
@@ -326,7 +334,7 @@ ident:
 /* A completer et/ou remplacer avec d'autres fonctions */
 node_t make_node(node_nature nature, int nops, ...) {
     node_t node = (node_t)malloc(sizeof(node_s));
-
+    printf("on vient de créer le noeud %s\n", node_nature2string(nature));
     if(!node){
         printf("Pas créé\n");
         return NULL;
@@ -338,12 +346,13 @@ node_t make_node(node_nature nature, int nops, ...) {
     node->lineno = yylineno;
 
     va_list ap;
-    if (nops==0){
+    if (nops!=0){
         va_start(ap,nops);
         node->opr=(node_t*)malloc(nops*sizeof(node_t));
         for (int i = 0; i<nops;i++){
             node -> opr[i]=va_arg(ap,node_t);
         }
+        va_end(ap);
     }
 
     switch(node->nature){
@@ -353,30 +362,30 @@ node_t make_node(node_nature nature, int nops, ...) {
             //node->global_decl = ;
             //node->decl_node = ;
             //node->offset = ;
-        break;        
+            break;        
         case NODE_TYPE: 
             va_start(ap,nops);
             node->type = va_arg(ap, node_type); 
-            //va_end(ap);
-        break;
+            va_end(ap);
+            break;
         case NODE_INTVAL: 
             //besoin de recup un argument faire un start
             node->value = yylval.intval;
-        break;
+            break;
         case NODE_BOOLVAL:
             va_start(ap,nops); 
             node->value = va_arg(ap, int);
-            //va_end(ap);
-        break;
+            va_end(ap);
+            break;
         case NODE_STRINGVAL: 
             node->str = strdup(yylval.strval);
             //node->offset = ;
-        break;
-        case NODE_FUNC: 
+            break;
+        //case NODE_FUNC: 
             //node->offset = ;
-        break;
+       // break;
         default:
-        break;
+            break;
     }
 
    /* switch(node->nops){
@@ -391,7 +400,7 @@ node_t make_node(node_nature nature, int nops, ...) {
         case 4:
         break;
     }*/
-    va_end(ap);
+   // va_end(ap);
     return node;
 
 
