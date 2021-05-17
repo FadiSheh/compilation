@@ -1,5 +1,5 @@
-int  start = 0;
-int  end = 100;
+int  start = 8;
+int  end=9;
 
 void  main() {
 int i, s = start , e = end;

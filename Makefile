@@ -17,7 +17,7 @@ else
 	LEX_FLAGS=
 endif
 
-CFLAGS=-O0 -g -std=c99 -DYY_NO_LEAKS -Wno-implicit-function-declaration
+CFLAGS=-O0 -g -std=c99 -DYY_NO_LEAKS -Wno-implicit-function-declaration -Wall
 INCLUDE=-I$(UTILS)
 
 all: minicc

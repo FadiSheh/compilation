@@ -559,7 +559,7 @@ static const yytype_uint16 yyrline[] =
      217,   220,   223,   226,   229,   232,   235,   238,   241,   244,
      247,   250,   253,   256,   259,   262,   265,   268,   271,   274,
      277,   280,   283,   286,   289,   292,   295,   301,   304,   310,
-     313,   318
+     313,   319
 };
 #endif
 
@@ -1495,7 +1495,7 @@ yyreduce:
 #line 94 "grammar.y" /* yacc.c:1646  */
     {
             (yyval.ptr) = make_node(NODE_LIST, 2, NULL, (yyvsp[0].ptr));
-            *program_root = (yyval.ptr);
+            //*program_root = $$;
 
          }
 #line 1502 "y.tab.c" /* yacc.c:1646  */
@@ -1510,8 +1510,8 @@ yyreduce:
   case 6:
 #line 108 "grammar.y" /* yacc.c:1646  */
     {
-            (yyval.ptr) = make_node(NODE_PROGRAM, 2, (yyvsp[-2].ptr), (yyvsp[-1].ptr)); //jaurais pas mis NODE_PROGRAM mais lequel .....?????????
-            *program_root = (yyval.ptr);
+            (yyval.ptr) = make_node(NODE_DECL, 2, (yyvsp[-2].ptr), (yyvsp[-1].ptr)); //jaurais pas mis NODE_PROGRAM mais lequel .....?????????
+            //*program_root = $$;
         }
 #line 1517 "y.tab.c" /* yacc.c:1646  */
     break;
@@ -1885,7 +1885,7 @@ yyreduce:
   case 53:
 #line 286 "grammar.y" /* yacc.c:1646  */
     {
-        (yyval.ptr) = make_node(NODE_INTVAL, 0, (yyvsp[0].intval)); //bizarre
+        (yyval.ptr) = make_node(NODE_INTVAL, 0, yylval.intval); //retourner la valeur
     }
 #line 1891 "y.tab.c" /* yacc.c:1646  */
     break;
@@ -1941,20 +1941,21 @@ yyreduce:
   case 60:
 #line 313 "grammar.y" /* yacc.c:1646  */
     {
-            (yyval.ptr) = make_node(NODE_STRINGVAL, 0);        }
-#line 1946 "y.tab.c" /* yacc.c:1646  */
+            (yyval.ptr) = make_node(NODE_STRINGVAL, 0, yylval.strval);        
+        }
+#line 1947 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 61:
-#line 318 "grammar.y" /* yacc.c:1646  */
+#line 319 "grammar.y" /* yacc.c:1646  */
     {
-        (yyval.ptr) = make_node(NODE_IDENT, 0);
+        (yyval.ptr) = make_node(NODE_IDENT, 0, yylval.strval); //renvoyer la valeur de l'étiquette
     }
-#line 1954 "y.tab.c" /* yacc.c:1646  */
+#line 1955 "y.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1958 "y.tab.c" /* yacc.c:1646  */
+#line 1959 "y.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2182,22 +2183,89 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 328 "grammar.y" /* yacc.c:1906  */
+#line 324 "grammar.y" /* yacc.c:1906  */
 
 
 /* A completer et/ou remplacer avec d'autres fonctions */
 node_t make_node(node_nature nature, int nops, ...) {
-    va_list ap;
+    node_t node = (node_t)malloc(sizeof(node_s));
 
-    return NULL;
+    if(!node){
+        printf("Pas créé\n");
+        return NULL;
+    }
+
+    //définir nombre d'arguments
+    node->nature = nature;
+    node->nops = nops;
+    node->lineno = yylineno;
+
+    va_list ap;
+    if (nops==0){
+        va_start(ap,nops);
+        node->opr=(node_t*)malloc(nops*sizeof(node_t));
+        for (int i = 0; i<nops;i++){
+            node -> opr[i]=va_arg(ap,node_t);
+        }
+    }
+
+    switch(node->nature){
+        case NODE_IDENT:
+            node->ident = strdup(yylval.strval);
+            //node->type = ;
+            //node->global_decl = ;
+            //node->decl_node = ;
+            //node->offset = ;
+        break;        
+        case NODE_TYPE: 
+            va_start(ap,nops);
+            node->type = va_arg(ap, node_type); 
+            //va_end(ap);
+        break;
+        case NODE_INTVAL: 
+            //besoin de recup un argument faire un start
+            node->value = yylval.intval;
+        break;
+        case NODE_BOOLVAL:
+            va_start(ap,nops); 
+            node->value = va_arg(ap, int);
+            //va_end(ap);
+        break;
+        case NODE_STRINGVAL: 
+            node->str = strdup(yylval.strval);
+            //node->offset = ;
+        break;
+        case NODE_FUNC: 
+            //node->offset = ;
+        break;
+        default:
+        break;
+    }
+
+   /* switch(node->nops){
+        case 0:
+        break;
+        case 1:
+        break;
+        case 2:
+        break;
+        case 3:
+        break;
+        case 4:
+        break;
+    }*/
+    va_end(ap);
+    return node;
+
+
 }
 
 
 void analyse_tree(node_t root) {
-    //dump_tree(root, "apres_syntaxe.dot");
+    dump_tree(root, "apres_syntaxe.dot");
     if (!stop_after_syntax) {
         analyse_passe_1(root);
-        //dump_tree(root, "apres_passe_1.dot");
+        dump_tree(root, "apres_passe_1.dot");
         if (!stop_after_verif) {
             create_program(); 
             gen_code_passe_2(root);

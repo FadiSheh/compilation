@@ -106,7 +106,7 @@ listdeclnonnull:
 vardecl:
         type listtypedecl TOK_SEMICOL
         {
-            $$ = make_node(NODE_PROGRAM, 2, $1, $2); //jaurais pas mis NODE_PROGRAM mais lequel .....?????????
+            $$ = make_node(NODE_DECL, 2, $1, $2); //jaurais pas mis NODE_PROGRAM mais lequel .....?????????
             //*program_root = $$;
         }
         ;
@@ -357,7 +357,7 @@ node_t make_node(node_nature nature, int nops, ...) {
         case NODE_TYPE: 
             va_start(ap,nops);
             node->type = va_arg(ap, node_type); 
-            va_end(ap);
+            //va_end(ap);
         break;
         case NODE_INTVAL: 
             //besoin de recup un argument faire un start
@@ -366,7 +366,7 @@ node_t make_node(node_nature nature, int nops, ...) {
         case NODE_BOOLVAL:
             va_start(ap,nops); 
             node->value = va_arg(ap, int);
-            va_end(ap);
+            //va_end(ap);
         break;
         case NODE_STRINGVAL: 
             node->str = strdup(yylval.strval);

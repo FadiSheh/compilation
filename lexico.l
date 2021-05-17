@@ -85,13 +85,15 @@ COMMENTAIRE     \/\/.*
 "||"    Return(TOK_OR);
 
 {IDF} {
-                //yylval.strval = strdup(yytext);
+                yylval.strval = strdup(yytext);
                 Return(TOK_IDENT);
 }
 
 {ENTIER} {
                 /* A completer : affecter yylval.intval et faire des verifications */
+				printf("on a un entier : %s", yytext);
 				yylval.intval = atoi(yytext); /*permet de transformer une chaine de caracteres en une donnee de type int*/
+				printf("entier : %d\n", yylval.intval);
                 Return(TOK_INTVAL);
 }
 
@@ -103,7 +105,7 @@ COMMENTAIRE     \/\/.*
 
 {COMMENTAIRE} {		
 				printf("TOK_COMMENTAIRE\n");	
-				return;
+				//return NULL;
 }
 
 

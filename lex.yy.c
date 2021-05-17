@@ -1047,7 +1047,7 @@ case 40:
 YY_RULE_SETUP
 #line 87 "lexico.l"
 {
-                //yylval.strval = strdup(yytext);
+                yylval.strval = strdup(yytext);
                 Return(TOK_IDENT);
 }
 	YY_BREAK
@@ -1056,14 +1056,16 @@ YY_RULE_SETUP
 #line 92 "lexico.l"
 {
                 /* A completer : affecter yylval.intval et faire des verifications */
+				printf("on a un entier : %s", yytext);
 				yylval.intval = atoi(yytext); /*permet de transformer une chaine de caracteres en une donnee de type int*/
+				printf("entier : %d\n", yylval.intval);
                 Return(TOK_INTVAL);
 }
 	YY_BREAK
 case 42:
 /* rule 42 can match eol */
 YY_RULE_SETUP
-#line 98 "lexico.l"
+#line 100 "lexico.l"
 {
                 /* A completer : affecter yylval.strval */
 				yylval.strval = strdup(yytext);
@@ -1072,21 +1074,21 @@ YY_RULE_SETUP
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 104 "lexico.l"
+#line 106 "lexico.l"
 {		
 				printf("TOK_COMMENTAIRE\n");	
-				return;
+				//return NULL;
 }
 	YY_BREAK
 case 44:
 /* rule 44 can match eol */
 YY_RULE_SETUP
-#line 110 "lexico.l"
+#line 112 "lexico.l"
 
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 112 "lexico.l"
+#line 114 "lexico.l"
 {
                 fprintf(stderr, "Error line %d: Lexical error\n", yylineno);
                 exit(1);
@@ -1094,10 +1096,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 118 "lexico.l"
+#line 120 "lexico.l"
 ECHO;
 	YY_BREAK
-#line 1101 "lex.yy.c"
+#line 1103 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2114,7 +2116,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 118 "lexico.l"
+#line 120 "lexico.l"
 
 
 int yywrap(void) {
