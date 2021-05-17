@@ -93,7 +93,7 @@ listdecl:
          listdeclnonnull
          {
             $$ = make_node(NODE_LIST, 2, NULL, $1);
-            *program_root = $$;
+            //*program_root = $$;
 
          }
          ;
@@ -107,7 +107,7 @@ vardecl:
         type listtypedecl TOK_SEMICOL
         {
             $$ = make_node(NODE_PROGRAM, 2, $1, $2); //jaurais pas mis NODE_PROGRAM mais lequel .....?????????
-            *program_root = $$;
+            //*program_root = $$;
         }
         ;
 
@@ -284,7 +284,7 @@ expr:
         $$ = make_node(NODE_AFFECT, 2, $1, $3); 
     }
     | TOK_INTVAL{
-        $$ = make_node(NODE_INTVAL, 0, yyval.intval); //retourner la valeur
+        $$ = make_node(NODE_INTVAL, 0, yylval.intval); //retourner la valeur
     }
     | TOK_TRUE{
         $$ = make_node(NODE_BOOLVAL, 0, 1);//renvoie direct si c vrai
@@ -311,20 +311,15 @@ paramprint:
             $$ = $1;
         }
         | TOK_STRING{
-            $$ = make_node(NODE_STRINGVAL, 0, yyval.strval);        
+            $$ = make_node(NODE_STRINGVAL, 0, yylval.strval);        
         }
         ;
 
 ident:
     TOK_IDENT{
-        $$ = make_node(NODE_IDENT, 0, yyval.strval); //renvoyer la valeur de l'étiquette
+        $$ = make_node(NODE_IDENT, 0, yylval.strval); //renvoyer la valeur de l'étiquette
     }
     ;
-
-
-
-
-
 
 %%
 
@@ -332,115 +327,82 @@ ident:
 node_t make_node(node_nature nature, int nops, ...) {
     node_t node = (node_t)malloc(sizeof(node_s));
 
+    if(!node){
+        printf("Pas créé\n");
+        return NULL;
+    }
+
     //définir nombre d'arguments
     node->nature = nature;
     node->nops = nops;
     node->lineno = yylineno;
 
     va_list ap;
-    va_start(ap,nops);
-
-
-    node->opr=(node_t*)malloc(nops*sizeof(node_t));
-    for (int i = 0; i<nops;i++){
-        node -> opr[i]=va_arg(ap,node_t);
+    if (nops==0){
+        va_start(ap,nops);
+        node->opr=(node_t*)malloc(nops*sizeof(node_t));
+        for (int i = 0; i<nops;i++){
+            node -> opr[i]=va_arg(ap,node_t);
+        }
     }
-    va_end(ap);
-
 
     switch(node->nature){
-
-        case NONE: 
-
-        break;
-        case NODE_PROGRAM: 
-        break;
-        case NODE_BLOCK: 
-        break;
-        case NODE_LIST: 
-        break;
-        case NODE_DECLS: 
-        break;
-        case NODE_DECL: 
-        break;
-        case NODE_IDENT: 
-        break;
+        case NODE_IDENT:
+            node->ident = strdup(yylval.strval);
+            //node->type = ;
+            //node->global_decl = ;
+            //node->decl_node = ;
+            //node->offset = ;
+        break;        
         case NODE_TYPE: 
+            va_start(ap,nops);
+            node->type = va_arg(ap, node_type); 
+            va_end(ap);
         break;
         case NODE_INTVAL: 
+            //besoin de recup un argument faire un start
+            node->value = yylval.intval;
         break;
-        case NODE_BOOLVAL: 
+        case NODE_BOOLVAL:
+            va_start(ap,nops); 
+            node->value = va_arg(ap, int);
+            va_end(ap);
         break;
         case NODE_STRINGVAL: 
+            node->str = strdup(yylval.strval);
+            //node->offset = ;
         break;
         case NODE_FUNC: 
+            //node->offset = ;
         break;
-        case NODE_IF: 
-        break;
-        case NODE_WHILE: 
-        break;
-        case NODE_FOR: 
-        break;
-        case NODE_DOWHILE: 
-        break;
-        case NODE_PLUS: 
-        break;
-        case NODE_MINUS: 
-        break;
-        case NODE_MUL: 
-        break;
-        case NODE_DIV: 
-        break;
-        case NODE_MOD: 
-        break;
-        case NODE_LT: 
-        break;
-        case NODE_GT: 
-        break;
-        case NODE_LE: 
-        break;
-        case NODE_GE: 
-        break;
-        case NODE_EQ: 
-        break;
-        case NODE_NE: 
-        break;
-        case NODE_AND: 
-        break;
-        case NODE_OR: 
-        break;
-        case NODE_BAND: 
-        break;
-        case NODE_BOR: 
-        break;
-        case NODE_BXOR: 
-        break;
-        case NODE_NOT: 
-        break;
-        case NODE_BNOT: 
-        break;
-        case NODE_SLL: 
-        break;
-        case NODE_SRA: 
-        break;
-        case NODE_SRL: 
-        break;
-        case NODE_UMINUS: 
-        break;
-        case NODE_AFFECT: 
-        break;
-        case NODE_PRINT: 
+        default:
         break;
     }
-    return NULL;
+
+   /* switch(node->nops){
+        case 0:
+        break;
+        case 1:
+        break;
+        case 2:
+        break;
+        case 3:
+        break;
+        case 4:
+        break;
+    }*/
+    va_end(ap);
+    return node;
+
+
 }
 
 
 void analyse_tree(node_t root) {
-    //dump_tree(root, "apres_syntaxe.dot");
+    dump_tree(root, "apres_syntaxe.dot");
     if (!stop_after_syntax) {
         analyse_passe_1(root);
-        //dump_tree(root, "apres_passe_1.dot");
+        dump_tree(root, "apres_passe_1.dot");
         if (!stop_after_verif) {
             create_program(); 
             gen_code_passe_2(root);
