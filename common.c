@@ -23,7 +23,91 @@ extern bool stop_after_verif;
 
 void parse_args(int argc, char ** argv) {
     // A implementer (la ligne suivante est a changer)
-    infile = argv[1];
+    //infile = argv[1];
+    int flag = 0;
+    char c;
+    int trace = 0;
+    int i = 0;
+    while( (c=getopt(argc, argv, "bo:t:r:svh")) != EOF )
+    {
+        switch(c){
+            case 'b':
+                if(i==0){
+                    //affichage de la banniere
+                    printf("==================\n");
+                    printf(" BEST COMPILATEUR\n");
+                    printf("  FADI ET AMELIE\n");
+                    printf("==================\n");
+                    exit(1);
+                }
+                else{
+                    //message d'erreur
+                    printf("erreur\n");
+                    exit(1);
+                }
+                break;
+            case 'o':
+                //défini fichier assembleur produit
+                infile = optarg;
+                i++;
+                break;
+            case 't':
+                //definit le niveau de trace à utiliser
+                trace = atoi(optarg);
+                if (trace >= 0 && trace <= 5){
+                    trace_level = atoi(optarg);
+                    i++;
+                }
+                else{
+                    trace_level = 0;
+                    i++;
+                }
+                break;
+            case 'r':
+                //definit nombre max de registres a utiliser
+                i++;
+                break;
+            case 's':
+                if(flag){
+                    //message d'erreur
+                    printf("erreur\n");
+                    i++;
+                    exit(1);
+
+                }
+                else{
+                    //arrete compilation apres analyse syntaxique
+                    stop_after_syntax = false;
+                    flag = 1;
+                    i++;
+                }
+                break;
+            case 'v':
+                if(flag){
+                    //message d'erreur
+                    printf("erreur\n");
+                    i++;
+                    exit(1);
+                }
+                else{
+                    //arrete compilation apres passe de verification
+                    stop_after_verif = false;
+                    flag = 1;
+                    i++;
+                }
+                break;
+            case 'h':
+                //afficher liste des options et arreter parsing des arguments
+                fprintf(stderr, "Options:\n-b \n-o \n-t \n-r\n-s\n-v\n-h\n");
+                break;
+            default:
+                break;
+            i++;
+        }
+        printf("-%c\n",(char) c);
+
+    }
+    exit(1);
 }
 
 
