@@ -3,88 +3,145 @@
 
 #include "defs.h"
 #include "passe_1.h"
-#include "./utils/miniccutils.h"
-extern int trace_level;
-context_t list_context;
-void analyse_passe_1(node_t root) {
 
-	if (!root){
-		printf("il est vide\n");
-		return;
+extern int trace_level;
+node_type dernier_type = TYPE_NONE;
+
+void analyse_passe_1(node_t root) {
+	printf("helloworld\n");
+	if(!root){
+		printf("Arbre est vide\n");
+		exit(1);
 	}
 
-	switch (root->nature){
-
-		case NODE_PROGRAM:
-		    list_context = create_context();
+	switch(root->nature){
+		case NODE_PROGRAM:	//
+			//initialisation contexte global vide
+			//voir fonction
 			push_global_context();
+			analyse_passe_1(root->opr[0]);
+			//analyse_passe_1(root->opr[1]);
+			//pop_context();
+			break;
+		case NODE_BLOCK: //
+			push_context();
+			analyse_passe_1(root->opr[0]);
+			analyse_passe_1(root->opr[1]);
+			pop_context();
+			break;
+		case NODE_IDENT: //
+			//pas d'appel à A1
+			//Deux choses en deux temps : type
+			root->type = dernier_type;
+			   /* TYPE_NONE,
+    TYPE_INT,
+    TYPE_BOOL,
+    TYPE_STRING,
+    TYPE_VOID,*/
+			//offset : int32_t
+			//locale : offset de la pile
+			//globale : offset dans la section .data
+			//root-> offset = ;
+			//global_decl : bool
+			//root-> global_decl = ;
+			//decl_node : pointeur _node_s *
+			//adresse du noeud contenant la déclaration de la variable référencée
+			//root-> decl_node = ;
+			break;
+		/*case NODE_AFFECT: //
+			//type
+			break;
+		case NODE_FUNC:
+			reset_env_current_offset();
+			analyse_passe_1(root->opr[0]);
+			analyse_passe_1(root->opr[1]);
+			analyse_passe_1(root->opr[2]);
+			//apres analyse de la fonction
+			//offset
+			root->offset = get_env_current_offset();
+			break;*/
+		case NODE_LIST:
 			analyse_passe_1(root->opr[0]);
 			analyse_passe_1(root->opr[1]);
 			break;
-
 		case NODE_DECLS:
 			analyse_passe_1(root->opr[0]);
 			analyse_passe_1(root->opr[1]);
 			break;
-
-		case NODE_IDENT:
-			
-			printf("OFFSET: %d \n",get_env_current_offset());
-			break;
-
-		case NODE_STRINGVAL:
-			break;
-
-		case NODE_FUNC:
-			break;
-
-		case NODE_AFFECT:
-			break;
-
 		case NODE_DECL:
+			analyse_passe_1(root->opr[0]);
+			analyse_passe_1(root->opr[1]);
 			break;
-
 		case NODE_TYPE:
+			//pas d'appel à A1
+			dernier_type = root->type;
+			printf("type : %d\n", dernier_type);
+			break;
+		case NODE_INTVAL:
+			//pas d'appel à A1
+			break;
+		case NODE_BOOLVAL:
+			//pas d'appel à A1
+			break;
+		case NODE_STRINGVAL:
+			//pas d'appel à A1
+			//offset
+			root-> offset = add_string(root->str);
 			break;
 
-		case NODE_LIST:
+		//type de tous les noeuds des opérateurs
+		/*case NODE_PLUS:
+			//deux fils
+			//contexte?
+			analyse_passe_1(root->opr[0]);
+			analyse_passe_1(root->opr[1]);
 			break;
-
+		case NODE_MINUS:
+			analyse_passe_1(root->opr[0]);
+			analyse_passe_1(root->opr[1]);
+			break;
+		case NODE_MUL:
+			analyse_passe_1(root->opr[0]);
+			analyse_passe_1(root->opr[1]);
+			break;
+		case NODE_DIV:
+			analyse_passe_1(root->opr[0]);
+			analyse_passe_1(root->opr[1]);
+			break;
+		case NODE_MOD:
+			analyse_passe_1(root->opr[0]);
+			analyse_passe_1(root->opr[1]);
+			break;
+		case NODE_IF:
+			//push_context();
+			break;
+		case NODE_WHILE:
+			break;
+		case NODE_FOR:
+			break;
+		case NODE_DOWHILE:
+			break;*/
 		default:
-			fprintf(stderr, "Error line %d: Node error %d\n", root->lineno, root->nature);
 			break;
-
-
 	}
-
-	
 }
 
 
-
-
-
-/*
-
-    node_nature nature;
-    node_type type;
-
-    int64_t value;
-    int32_t offset;
-    bool global_decl;
-    int32_t lineno;
-
-    int32_t nops;
-    struct _node_s ** opr;
-    
-    struct _node_s * decl_node;
-
-    char * ident;
-    char * str;
-
-    // Pour l'affichage du graphe
-    int32_t node_num;
-
-
-
-    */
+  /*  NODE_LT,
+    NODE_GT,
+    NODE_LE,
+    NODE_GE,
+    NODE_EQ,
+    NODE_NE,
+    NODE_AND,
+    NODE_OR,
+    NODE_BAND,
+    NODE_BOR,
+    NODE_BXOR,
+    NODE_NOT,
+    NODE_BNOT,
+    NODE_SLL,
+    NODE_SRA,
+    NODE_SRL,
+    NODE_UMINUS,
+    NODE_PRINT,*/
