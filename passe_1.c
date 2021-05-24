@@ -17,6 +17,7 @@ void analyse_passe_1(node_t root) {
 		printf("Arbre est vide\n");
 		//exit(1);
 	}
+	else{
 	printf("Nature : %s\n", node_nature2string(root->nature));
 	switch(root->nature){
 		case NODE_PROGRAM:	//
@@ -29,7 +30,7 @@ void analyse_passe_1(node_t root) {
 			flag = 0;
 			analyse_passe_1(root->opr[1]);
 			printf("fin des variables LOCALES\n");
-			//pop_context();
+			pop_context();
 			break;
 		case NODE_BLOCK: //
 			push_context();
@@ -46,32 +47,22 @@ void analyse_passe_1(node_t root) {
 			//Deux choses en deux temps : type
 			root->type = dernier_type;
 			root-> offset = env_add_element(root->ident, root);
+			printf("avant %d\n", root->offset);
+			if(root-> offset < 0){
+					root->decl_node = get_decl_node(root->ident);
+					printf("variable existe deja\n");
+			}
+			printf("apres %d\n", root->offset);
 			if(flag){
 				//variable gloable
 				printf("c une globale\n");
+				root-> global_decl = true;
 				//noeud = get_decl_node(root->ident);
 			}
-			else{
-				//variable locale
-				//root-> ident = get_decl_node(root->ident);
-				root->offset = env_add_element(root->ident, root);
-				if(!get_decl_node(root->ident)){
-					root->decl_node = get_decl_node(root->ident);
-					printf("variable existe deja\n");
-				}
-			}
-			//offset : int32_t
-			//locale : offset de la pile
-			//globale : offset dans la section .data
-			//root-> offset = ;
-			//global_decl : bool
-			//root-> global_decl = ;
-			//decl_node : pointeur _node_s *
-			//adresse du noeud contenant la déclaration de la variable référencée
-			//root-> decl_node = ;
 			break;
 		case NODE_AFFECT: //
-			//type
+			analyse_passe_1(root->opr[0]);
+			analyse_passe_1(root->opr[1]);
 			break;
 		case NODE_FUNC:
 			reset_env_current_offset();
@@ -135,37 +126,95 @@ void analyse_passe_1(node_t root) {
 			analyse_passe_1(root->opr[1]);
 			break;
 		case NODE_IF:
-			//push_context();
+			analyse_passe_1(root->opr[0]);
+			analyse_passe_1(root->opr[1]);
+			analyse_passe_1(root->opr[2]);
 			break;
 		case NODE_WHILE:
+			analyse_passe_1(root->opr[0]);
+			analyse_passe_1(root->opr[1]);
 			break;
 		case NODE_FOR:
+			analyse_passe_1(root->opr[0]);
+			analyse_passe_1(root->opr[1]);
+			analyse_passe_1(root->opr[2]);
+			analyse_passe_1(root->opr[3]);
 			break;
 		case NODE_DOWHILE:
+			analyse_passe_1(root->opr[0]);
+			analyse_passe_1(root->opr[1]);
+			break;
+		case NODE_LT:
+			analyse_passe_1(root->opr[0]);
+			analyse_passe_1(root->opr[1]);
+			break;
+		case NODE_GT:
+			analyse_passe_1(root->opr[0]);
+			analyse_passe_1(root->opr[1]);
+			break;
+		case NODE_LE:
+			analyse_passe_1(root->opr[0]);
+			analyse_passe_1(root->opr[1]);
+			break;
+		case NODE_GE:
+			analyse_passe_1(root->opr[0]);
+			analyse_passe_1(root->opr[1]);
+			break;
+		case NODE_EQ:
+			analyse_passe_1(root->opr[0]);
+			analyse_passe_1(root->opr[1]);
+			break;
+		case NODE_NE:
+			analyse_passe_1(root->opr[0]);
+			analyse_passe_1(root->opr[1]);
+			break;
+		case NODE_AND:
+			analyse_passe_1(root->opr[0]);
+			analyse_passe_1(root->opr[1]);
+			break;
+		case NODE_OR:
+			analyse_passe_1(root->opr[0]);
+			analyse_passe_1(root->opr[1]);
+			break;
+		case NODE_BAND:
+			analyse_passe_1(root->opr[0]);
+			analyse_passe_1(root->opr[1]);
+			break;
+		case NODE_BOR:
+			analyse_passe_1(root->opr[0]);
+			analyse_passe_1(root->opr[1]);
+			break;
+		case NODE_BXOR:
+			analyse_passe_1(root->opr[0]);
+			analyse_passe_1(root->opr[1]);
+			break;
+		case NODE_NOT:
+			analyse_passe_1(root->opr[0]);
+			break;
+		case NODE_BNOT:
+			analyse_passe_1(root->opr[0]);
+			break;
+		case NODE_SLL:
+			analyse_passe_1(root->opr[0]);
+			analyse_passe_1(root->opr[1]);
+			break;
+		case NODE_SRA:
+			analyse_passe_1(root->opr[0]);
+			analyse_passe_1(root->opr[1]);
+			break;
+		case NODE_SRL:
+			analyse_passe_1(root->opr[0]);
+			analyse_passe_1(root->opr[1]);
+			break;
+		case NODE_UMINUS:
+			analyse_passe_1(root->opr[0]);
+			break;
+		case NODE_PRINT:
+			analyse_passe_1(root->opr[0]);
 			break;
 		default:
 			break;
-
 	}
-	printf("finito %d\n", cpt++);
+	}
+	//printf("finito %d\n", cpt++);
 }
-
-
-  /*  NODE_LT,
-    NODE_GT,
-    NODE_LE,
-    NODE_GE,
-    NODE_EQ,
-    NODE_NE,
-    NODE_AND,
-    NODE_OR,
-    NODE_BAND,
-    NODE_BOR,
-    NODE_BXOR,
-    NODE_NOT,
-    NODE_BNOT,
-    NODE_SLL,
-    NODE_SRA,
-    NODE_SRL,
-    NODE_UMINUS,
-    NODE_PRINT,*/
