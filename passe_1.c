@@ -3,20 +3,21 @@
 
 #include "defs.h"
 #include "passe_1.h"
-
+#include "common.h"
 #include "utils/miniccutils.h"
 extern int trace_level;
 node_type dernier_type = TYPE_NONE;
 node_t noeud;
 int flag = 0;
+int cpt = 0;
 
 void analyse_passe_1(node_t root) {
-	printf("helloworld\n");
+	//printf("helloworld\n");
 	if(!root){
 		printf("Arbre est vide\n");
 		//exit(1);
 	}
-	printf("nouveau noeud \n");
+	printf("Nature : %s\n", node_nature2string(root->nature));
 	switch(root->nature){
 		case NODE_PROGRAM:	//
 			//initialisation contexte global vide
@@ -144,7 +145,9 @@ void analyse_passe_1(node_t root) {
 			break;
 		default:
 			break;
+
 	}
+	printf("finito %d\n", cpt++);
 }
 
 
