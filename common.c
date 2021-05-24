@@ -23,7 +23,7 @@ extern bool stop_after_verif;
 
 void parse_args(int argc, char ** argv) {
     // A implementer (la ligne suivante est a changer)
-    //infile = argv[1];
+    infile = argv[1];
     int flag = 0;
     char c;
     int trace = 0;
@@ -107,7 +107,8 @@ void parse_args(int argc, char ** argv) {
         printf("-%c\n",(char) c);
 
     }
-    exit(1);
+    printf("parse done\n");
+    //exit(1);
 }
 
 

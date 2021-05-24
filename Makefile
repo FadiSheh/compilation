@@ -28,11 +28,11 @@ minicc: y.tab.o lex.yy.o arch.o common.o passe_1.o passe_2.o
 
 y.tab.c: grammar.y Makefile
 	@echo "| yacc -d grammar.y"
-	@yacc -d grammar.y
+	@yacc -d -Wyacc grammar.y 
 
 lex.yy.c: lexico.l Makefile
 	@echo "| lex $(LEX_FLAGS) lexico.l"
-	@lex $(LEX_FLAGS) lexico.l
+	@lex $(LEX_FLAGS)  lexico.l 
 
 lex.yy.o: lex.yy.c
 	@echo "| Compiling $@"

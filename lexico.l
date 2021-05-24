@@ -91,9 +91,7 @@ COMMENTAIRE     \/\/.*
 
 {ENTIER} {
                 /* A completer : affecter yylval.intval et faire des verifications */
-				printf("on a un entier : %s", yytext);
 				yylval.intval = atoi(yytext); /*permet de transformer une chaine de caracteres en une donnee de type int*/
-				printf("entier : %d\n", yylval.intval);
                 Return(TOK_INTVAL);
 }
 
@@ -103,8 +101,7 @@ COMMENTAIRE     \/\/.*
                 Return(TOK_STRING);
 }
 
-{COMMENTAIRE} {		
-				printf("TOK_COMMENTAIRE\n");	
+{COMMENTAIRE} {			
 				//return NULL;
 }
 

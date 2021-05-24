@@ -6,10 +6,10 @@ digraph global_vars {
     edge[tailclip=true];
     N3 -> N4
     N5 [shape=record, label="{{NODE DECL|Nb. ops: 2}}"];
-    N6 [shape=record, label="{{NODE IDENT|Type: TYPE NONE}|{<decl>Decl      |Ident: start|Offset: 0}}"];
+    N6 [shape=record, label="{{NODE IDENT|Type: TYPE INT}|{<decl>Decl      |Ident: start|Offset: 0}}"];
     edge[tailclip=true];
     N5 -> N6
-    N7 [shape=record, label="{{NODE INTVAL|Type: TYPE NONE}|{Value: 0}}"];
+    N7 [shape=record, label="{{NODE INTVAL|Type: TYPE NONE}|{Value: 8}}"];
     edge[tailclip=true];
     N5 -> N7
     edge[tailclip=true];
@@ -21,10 +21,10 @@ digraph global_vars {
     edge[tailclip=true];
     N8 -> N9
     N10 [shape=record, label="{{NODE DECL|Nb. ops: 2}}"];
-    N11 [shape=record, label="{{NODE IDENT|Type: TYPE NONE}|{<decl>Decl      |Ident: end|Offset: 0}}"];
+    N11 [shape=record, label="{{NODE IDENT|Type: TYPE INT}|{<decl>Decl      |Ident: end|Offset: 4}}"];
     edge[tailclip=true];
     N10 -> N11
-    N12 [shape=record, label="{{NODE INTVAL|Type: TYPE NONE}|{Value: 100}}"];
+    N12 [shape=record, label="{{NODE INTVAL|Type: TYPE NONE}|{Value: 9}}"];
     edge[tailclip=true];
     N10 -> N12
     edge[tailclip=true];

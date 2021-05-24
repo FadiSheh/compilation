@@ -334,7 +334,7 @@ ident:
 /* A completer et/ou remplacer avec d'autres fonctions */
 node_t make_node(node_nature nature, int nops, ...) {
     node_t node = (node_t)malloc(sizeof(node_s));
-    printf("on vient de créer le noeud %s\n", node_nature2string(nature));
+    //printf("on vient de créer le noeud %s\n", node_nature2string(nature));
     if(!node){
         printf("Pas créé\n");
         return NULL;
@@ -358,49 +358,33 @@ node_t make_node(node_nature nature, int nops, ...) {
     switch(node->nature){
         case NODE_IDENT:
             node->ident = strdup(yylval.strval);
-            //node->type = ;
-            //node->global_decl = ;
-            //node->decl_node = ;
-            //node->offset = ;
-            break;        
+            break;  
+
         case NODE_TYPE: 
             va_start(ap,nops);
             node->type = va_arg(ap, node_type); 
             va_end(ap);
             break;
+
         case NODE_INTVAL: 
             //besoin de recup un argument faire un start
             node->value = yylval.intval;
+
             break;
         case NODE_BOOLVAL:
             va_start(ap,nops); 
             node->value = va_arg(ap, int);
             va_end(ap);
             break;
+
         case NODE_STRINGVAL: 
             node->str = strdup(yylval.strval);
-            //node->offset = ;
             break;
-        //case NODE_FUNC: 
-            //node->offset = ;
-       // break;
+
         default:
             break;
     }
 
-   /* switch(node->nops){
-        case 0:
-        break;
-        case 1:
-        break;
-        case 2:
-        break;
-        case 3:
-        break;
-        case 4:
-        break;
-    }*/
-   // va_end(ap);
     return node;
 
 
@@ -412,11 +396,13 @@ void analyse_tree(node_t root) {
     if (!stop_after_syntax) {
         analyse_passe_1(root);
         dump_tree(root, "apres_passe_1.dot");
+        printf("Passe_1 Done\n");
         if (!stop_after_verif) {
             create_program(); 
             gen_code_passe_2(root);
             dump_mips_program(outfile);
             free_program();
+            printf("Passe_2 Done\n");
         }
         free_global_strings();
     }
