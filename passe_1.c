@@ -15,25 +15,27 @@ void analyse_passe_1(node_t root) {
 	//printf("helloworld\n");
 	if(!root){
 		printf("Arbre est vide\n");
-		//exit(1);
+
 	}
 	else{
 	printf("Nature : %s\n", node_nature2string(root->nature));
 	switch(root->nature){
-		case NODE_PROGRAM:	//
-			//initialisation contexte global vide
-			//voir fonction
-			push_global_context();
+
+		case NODE_PROGRAM:
+			push_global_context(); //Initialise le contexte pour les varibales globales
 			flag = 1;
 			analyse_passe_1(root->opr[0]);
-			printf("fin des variables GLOBALES\n");
+	
 			flag = 0;
 			analyse_passe_1(root->opr[1]);
-			printf("fin des variables LOCALES\n");
-			pop_context();
+			
+			//pop_context();
 			break;
+
 		case NODE_BLOCK: //
+
 			push_context();
+
 			if(root->opr[0] != NULL){
 				analyse_passe_1(root->opr[0]);
 			}
@@ -42,24 +44,31 @@ void analyse_passe_1(node_t root) {
 			}
 			pop_context();
 			break;
+
 		case NODE_IDENT: //
 			//pas d'appel à A1
 			//Deux choses en deux temps : type
 			root->type = dernier_type;
-			root-> offset = env_add_element(root->ident, root);
-			printf("avant %d\n", root->offset);
-			if(root-> offset < 0){
-					root->decl_node = get_decl_node(root->ident);
+			//root-> offset = env_add_element(root->ident, root);
+
+			int test = env_add_element(root->ident, root);
+		
+			if( test < 0){
+
+					//root-> offset = 0;
+					root->decl_node = mggode(root->ident);
 					printf("variable existe deja\n");
+
+			} else  { 
+				root-> offset = test;
 			}
-			printf("apres %d\n", root->offset);
+
 			if(flag){
 				//variable gloable
-				printf("c une globale\n");
 				root-> global_decl = true;
-				//noeud = get_decl_node(root->ident);
 			}
 			break;
+
 		case NODE_AFFECT: //
 			analyse_passe_1(root->opr[0]);
 			analyse_passe_1(root->opr[1]);
@@ -68,10 +77,10 @@ void analyse_passe_1(node_t root) {
 			reset_env_current_offset();
 			analyse_passe_1(root->opr[0]);
 			analyse_passe_1(root->opr[1]);
-			analyse_passe_1(root->opr[2]);
-			//apres analyse de la fonction
-			//offset
 			root->offset = get_env_current_offset();
+			analyse_passe_1(root->opr[2]);
+
+			
 			break;
 		case NODE_LIST:
 			analyse_passe_1(root->opr[0]);
