@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 
 #include "defs.h"
@@ -116,15 +115,19 @@ void analyse_passe_1(node_t root) {
 			break;
 		case NODE_MINUS:
 			analyse(root, root->nops);
+			errorINT(root);
 			break;
 		case NODE_MUL:
 			analyse(root, root->nops);
+			errorINT(root);
 			break;
 		case NODE_DIV:
 			analyse(root, root->nops);
+			errorINT(root);
 			break;
 		case NODE_MOD:
 			analyse(root, root->nops);
+			errorINT(root);
 			break;
 		case NODE_IF:
 			analyse(root, root->nops);
@@ -140,15 +143,19 @@ void analyse_passe_1(node_t root) {
 			break;
 		case NODE_LT:
 			analyse(root, root->nops);
+			errorINT(root);
 			break;
 		case NODE_GT:
 			analyse(root, root->nops);
+			errorINT(root);
 			break;
 		case NODE_LE:
 			analyse(root, root->nops);
+			errorINT(root);
 			break;
 		case NODE_GE:
 			analyse(root, root->nops);
+			errorINT(root);
 			break;
 		case NODE_EQ:
 			analyse(root, root->nops);
@@ -175,6 +182,7 @@ void analyse_passe_1(node_t root) {
 			break;
 		case NODE_BXOR:
 			analyse(root, root->nops);
+			errorBOOL(root);
 			break;
 		case NODE_NOT:
 			analyse(root, root->nops);
@@ -182,18 +190,22 @@ void analyse_passe_1(node_t root) {
 			break;
 		case NODE_BNOT:
 			analyse(root, root->nops);
+			errorBOOL(root);
 			break;
 		case NODE_SLL:
 			analyse(root, root->nops);
+			errorINT(root);
 			break;
 		case NODE_SRA:
 			analyse(root, root->nops);
 			break;
 		case NODE_SRL:
 			analyse(root, root->nops);
+			errorINT(root);
 			break;
 		case NODE_UMINUS:
 			analyse(root, root->nops);
+			errorINT(root);
 			break;
 		case NODE_PRINT:
 			analyse(root, root->nops);
