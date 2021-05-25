@@ -6,7 +6,7 @@
 
 
 void analyse_passe_1(node_t root);
-
+void analyse(node_t node, int nops);
 
 #endif
 
