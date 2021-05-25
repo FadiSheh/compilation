@@ -139,95 +139,99 @@ void analyse_passe_1(node_t root) {
 			break;
 		case NODE_IF:
 			analyse(root, root->nops);
+			errorCOND(root);
 			break;
 		case NODE_WHILE:
 			analyse(root, root->nops);
+			errorCOND(root);
 			break;
 		case NODE_FOR:
 			analyse(root, root->nops);
+			errorFOR(root);
 			break;
 		case NODE_DOWHILE:
 			analyse(root, root->nops);
+			errorCOND(root);
 			break;
 		case NODE_LT:
 			analyse(root, root->nops);
 			errorINT(root);
-			root->type = root->opr[0]->type;
+			root->type = TYPE_BOOL;
 			break;
 		case NODE_GT:
 			analyse(root, root->nops);
 			errorINT(root);
-			root->type = root->opr[0]->type;
+			root->type = TYPE_BOOL;
 			break;
 		case NODE_LE:
 			analyse(root, root->nops);
 			errorINT(root);
-			root->type = root->opr[0]->type;
+			root->type = TYPE_BOOL;
 			break;
 		case NODE_GE:
 			analyse(root, root->nops);
 			errorINT(root);
-			root->type = root->opr[0]->type;
+			root->type = TYPE_BOOL;
 			break;
 		case NODE_EQ:
 			analyse(root, root->nops);
-			root->type = root->opr[0]->type;
+			root->type = TYPE_BOOL;
 			
 			break;
 		case NODE_NE:
 			analyse(root, root->nops);
-			root->type = root->opr[0]->type;
+			root->type = TYPE_BOOL;
 			break;
 		case NODE_AND:
 			analyse(root, root->nops);
 			errorBOOL(root);
-			root->type = root->opr[0]->type;
+			root->type = TYPE_BOOL;
 			break;
 		case NODE_OR:
 			analyse(root, root->nops);
 			errorBOOL(root);
-			root->type = root->opr[0]->type;
+			root->type = TYPE_BOOL;
 			break;
 		case NODE_BAND:
 			analyse(root, root->nops);
 			errorBOOL(root);
-			root->type = root->opr[0]->type;
+			root->type = TYPE_BOOL;
 			break;
 		case NODE_BOR:
 			analyse(root, root->nops);
 			errorBOOL(root);
-			root->type = root->opr[0]->type;
+			root->type = TYPE_BOOL;
 			break;
 		case NODE_BXOR:
 			analyse(root, root->nops);
 			errorBOOL(root);
-			root->type = root->opr[0]->type;
+			root->type = TYPE_BOOL;
 			break;
 		case NODE_NOT:
 			analyse(root, root->nops);
 			errorBOOL(root);
-			root->type = root->opr[0]->type;
+			root->type = TYPE_BOOL;
 			break;
 		case NODE_BNOT:
 			analyse(root, root->nops);
 			errorBOOL(root);
-			root->type = root->opr[0]->type;
+			root->type = TYPE_BOOL;
 			break;
 		case NODE_SLL:
 			analyse(root, root->nops);
 			errorINT(root);
-			root->type = root->opr[0]->type;
+			root->type = TYPE_BOOL;
 			break;
 		case NODE_SRA:
 			analyse(root, root->nops);
 			errorINT(root);
-			root->type = root->opr[0]->type;
+			root->type = TYPE_BOOL;
 
 			break;
 		case NODE_SRL:
 			analyse(root, root->nops);
 			errorINT(root);
-			root->type = root->opr[0]->type;
+			root->type = TYPE_BOOL;
 			break;
 		case NODE_UMINUS:
 			analyse(root, root->nops);
@@ -284,3 +288,37 @@ void errorINT(node_t node){
 
 	}
 }	
+
+
+void errorFOR(node_t node){
+
+	if(node->opr[0]->type!=TYPE_INT){
+
+		fprintf(stderr, "Error line %d: Operation not permitted, first argument is type %s. Must be TYPE_INT \n", node->lineno, node_type2string(node->opr[0]->type));
+		exit(1);
+
+	} else if(node->opr[1]->type!=TYPE_BOOL){
+
+		fprintf(stderr, "Error line %d: Operation not permitted, second argument is type %s. Must be TYPE_BOOL \n", node->lineno, node_type2string(node->opr[1]->type));
+		exit(1);
+
+
+	} else if(node->opr[2]->type!=TYPE_INT){
+
+		fprintf(stderr, "Error line %d: Operation not permitted, third argument is type %s. Must be TYPE_INT \n", node->lineno, node_type2string(node->opr[2]->type));
+		exit(1);
+
+
+	}
+}	
+
+void errorCOND(node_t node){
+
+	if(node->opr[0]->type!=TYPE_BOOL){
+
+		fprintf(stderr, "Error line %d: Operation not permitted, argument is type %s. Must be TYPE_BOOL \n", node->lineno, node_type2string(node->opr[0]->type));
+		exit(1);
+
+	}
+
+}
