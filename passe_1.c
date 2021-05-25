@@ -7,7 +7,7 @@
 #include "utils/miniccutils.h"
 extern int trace_level;
 node_type dernier_type = TYPE_NONE;
-
+int flag =0;
 
 void analyse_passe_1(node_t root) {
 	//printf("helloworld\n");
@@ -23,8 +23,9 @@ void analyse_passe_1(node_t root) {
 			push_global_context(); //Initialise le contexte pour les varibales globales
 
 
-
+			flag=1;
 			analyse_passe_1(root->opr[0]);
+			flag=0;
 			analyse_passe_1(root->opr[1]);
 			
 
@@ -47,14 +48,24 @@ void analyse_passe_1(node_t root) {
 
 		case NODE_IDENT: //
 
+			if (flag==1){
+
+				root->global_decl =true;
+
+			} else {root->global_decl =false;}
+
 			root->type = dernier_type;
 			node_t tmp;
 			tmp = get_decl_node(root->ident);
 			
 			if (tmp){
 				root->decl_node = tmp;
+				root->type=tmp->type;
 			}	
-			else {printf("ERREUr");}	
+			else {
+				//fprintf(stderr, "Error line %d: Undefined variable of type%s\n", root->lineno, root->ident);
+               // exit(1);
+			}	
 			break;
 
 		case NODE_AFFECT: //
@@ -67,7 +78,7 @@ void analyse_passe_1(node_t root) {
 			analyse(root, root->nops);
 			root->offset = get_env_current_offset();
 			break;
-			
+
 		case NODE_LIST:
 			analyse(root, root->nops);
 			break;
@@ -100,6 +111,8 @@ void analyse_passe_1(node_t root) {
 		case NODE_PLUS:
 
 			analyse(root, root->nops);
+			errorINT(root);
+
 			break;
 		case NODE_MINUS:
 			analyse(root, root->nops);
@@ -139,27 +152,33 @@ void analyse_passe_1(node_t root) {
 			break;
 		case NODE_EQ:
 			analyse(root, root->nops);
+			
 			break;
 		case NODE_NE:
 			analyse(root, root->nops);
 			break;
 		case NODE_AND:
 			analyse(root, root->nops);
+			errorBOOL(root);
 			break;
 		case NODE_OR:
 			analyse(root, root->nops);
+			errorBOOL(root);
 			break;
 		case NODE_BAND:
 			analyse(root, root->nops);
+			errorBOOL(root);
 			break;
 		case NODE_BOR:
-			analyse(root, root->nops);;
+			analyse(root, root->nops);
+			errorBOOL(root);
 			break;
 		case NODE_BXOR:
 			analyse(root, root->nops);
 			break;
 		case NODE_NOT:
 			analyse(root, root->nops);
+			errorBOOL(root);
 			break;
 		case NODE_BNOT:
 			analyse(root, root->nops);
@@ -193,3 +212,32 @@ void analyse(node_t node, int nops){
 		analyse_passe_1(node->opr[i]);
 	}
 }
+
+void errorBOOL(node_t node){
+
+	if(node->opr[0]->type!=TYPE_BOOL||node->opr[1]->type!=TYPE_BOOL){
+
+		fprintf(stderr, "Error line %d: Operation not permitted, operand is type %s. Must be TYPE_BOOL \n", node->lineno, node_type2string(node->opr[0]->type));
+		exit(1);
+	}	
+}	
+
+
+void errorINT(node_t node){
+
+	printf("TYPE: %s \n", node_type2string(node->opr[0]->type));
+	printf("TYPE: %s \n", node_type2string(node->opr[1]->type));
+
+	if(node->opr[0]->type!=TYPE_INT){
+
+		fprintf(stderr, "Error line %d: Operation not permitted, first operand is type %s. Must be TYPE_INT \n", node->lineno, node_type2string(node->opr[0]->type));
+		exit(1);
+
+	} else if(node->opr[1]->type!=TYPE_INT){
+
+		fprintf(stderr, "Error line %d: Operation not permitted, second operand is type %s. Must be TYPE_INT \n", node->lineno, node_type2string(node->opr[1]->type));
+		exit(1);
+
+
+	}
+}	
