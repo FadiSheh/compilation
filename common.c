@@ -40,10 +40,13 @@ void parse_args(int argc, char ** argv) {
             case 'b':
                 if(argc == 2){
                     //affichage de la banniere
-                    printf("==================\n");
-                    printf("    COMPILATEUR\n");
-                    printf("  FADI ET AMELIE\n");
-                    printf("==================\n");
+                    printf("\n\n░█████╗░░█████╗░███╗░░░███╗██████╗░██╗██╗░░░░░░█████╗░████████╗███████╗██╗░░░██╗██████╗░\n");
+                    printf("██╔══██╗██╔══██╗████╗░████║██╔══██╗██║██║░░░░░██╔══██╗╚══██╔══╝██╔════╝██║░░░██║██╔══██╗\n");
+                    printf("██║░░╚═╝██║░░██║██╔████╔██║██████╔╝██║██║░░░░░███████║░░░██║░░░█████╗░░██║░░░██║██████╔╝\n");
+                    printf("██║░░██╗██║░░██║██║╚██╔╝██║██╔═══╝░██║██║░░░░░██╔══██║░░░██║░░░██╔══╝░░██║░░░██║██╔══██╗\n");
+                    printf("╚█████╔╝╚█████╔╝██║░╚═╝░██║██║░░░░░██║███████╗██║░░██║░░░██║░░░███████╗╚██████╔╝██║░░██║\n");
+                    printf("░╚════╝░░╚════╝░╚═╝░░░░░╚═╝╚═╝░░░░░╚═╝╚══════╝╚═╝░░╚═╝░░░╚═╝░░░╚══════╝░╚═════╝░╚═╝░░╚═╝\n\n");
+                    printf("Amélie KIRADY and Fadi SHEHADEH\n\n");
                     exit(1);
                 }
                 else{
@@ -104,7 +107,15 @@ void parse_args(int argc, char ** argv) {
                 break;
             case 'h':
                 //afficher liste des options et arreter parsing des arguments
-                fprintf(stderr, "Options:\n-b   afficher banniere\n-o   definir nom fichier assembleur\n-t   definir niveau de trace\n-r   definir nombre max de registres\n-s   arreter compilation apres analyse syntaxique\n-v   arreter compilation apres passe de verification\n-h   afficher liste des options\n");
+                fprintf(stderr, "Utilisation: \n./minicc <options> <fichier> \n\n");
+                printf("options:\n");
+                printf("%-14s %-20s \n", "  -b", ": Affiche bannière");
+                printf("%-14s %-20s \n", "  -o <fichier>", ": Définit le nom du fichier assembleur produit (déf: out.s)");
+                printf("%-14s %-20s \n", "  -t <int>", ": Définit le nombre de trace à utiliser entre 0 et 5 (0 = pas de trace; 5 = toutes les traces. (déf = 0)");
+                printf("%-14s %-20s \n", "  -r <int>", ": Définit le nombre maximum de registres à utiliser, entre 4 et 8 (déf: 8)");
+                printf("%-14s %-20s \n", "  -s", ": Arrêter la compilation après l'analyse syntaxique (déf = non)");
+                printf("%-14s %-20s \n", "  -v", ": Arrêter la compilation après la passe de vérification (déf = non)");
+                printf("%-14s %-20s \n", "  -h", ": Afficher la liste des options et arrêter le parsing des arguments");
                 exit(1);
                 break;
             case '?':
