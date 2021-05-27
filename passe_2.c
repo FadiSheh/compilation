@@ -4,8 +4,8 @@
 #include "defs.h"
 #include "passe_2.h"
 
-node_type dernier_type = TYPE_NONE;
-int flag = 0;
+
+//int flag = 0;
 void gen_code_passe_2(node_t root) {
 	
 	//printf("helloworld\n");
@@ -30,9 +30,9 @@ void gen_code_passe_2(node_t root) {
 
 				.text
 				main:*/
-				flag=1;
+				//flag=1;
 				gen_code_passe_2(root->opr[0]);
-				flag=0;
+				//flag=0;
 				create_inst_text_sec();
 				gen_code_passe_2(root->opr[1]);
 			
@@ -51,11 +51,11 @@ void gen_code_passe_2(node_t root) {
 
 		case NODE_IDENT: //
 
-			if (flag==1){
+			/*if (flag==1){
 
 
 			} else {
-			}
+			}*/
 			
 
 			break;
@@ -86,7 +86,7 @@ void gen_code_passe_2(node_t root) {
 			break;
 
 		case NODE_DECL:
-			create_inst_word(root->opr[1]->ident, root->opr[0]->value);
+			create_inst_word(root->opr[0]->ident, root->opr[1]->value);
 			break;
 
 		case NODE_TYPE:
@@ -101,12 +101,11 @@ void gen_code_passe_2(node_t root) {
 		case NODE_STRINGVAL:
 
 			break;
+		default:
+			break;
 			
 
 		}
 	}
 
-	free_global_strings();
-	free_program();
 }
-
