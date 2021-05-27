@@ -128,8 +128,8 @@ void parse_args(int argc, char ** argv) {
 
     }
     infile = argv[optind];
-    printf("optind : %d\n", optind);
-    printf("argc : %d\n", argc);
+    //printf("optind : %d\n", optind);
+    //printf("argc : %d\n", argc);
     if(optind == argc){
         printf("erreur : il manque un fichier\n");
         exit(1);
@@ -440,7 +440,5 @@ const char * node_nature2symb(node_nature t) {
             exit(1);
     }
 }
-
-
 
 
