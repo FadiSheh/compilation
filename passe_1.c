@@ -12,11 +12,11 @@ int flag =0;
 void analyse_passe_1(node_t root) {
 	//printf("helloworld\n");
 	if(!root){
-		printf("Arbre est vide\n");
+		//printf("Arbre est vide\n");
 
 	} else {
 
-	printf("Nature : %s\n", node_nature2string(root->nature));
+	//printf("Nature : %s\n", node_nature2string(root->nature));
 	switch(root->nature){
 
 		case NODE_PROGRAM:
@@ -61,21 +61,24 @@ void analyse_passe_1(node_t root) {
 			if (tmp){
 				root->decl_node = tmp;
 				root->type=tmp->type;
+
 			}	
 			else {
-				//fprintf(stderr, "Error line %d: Undefined variable of type%s\n", root->lineno, root->ident);
-               // exit(1);
+				//root->offset = get_env_current_offset();
+				//fprintf(stderr, "Error line %d: Operation not permitted\n", root->lineno-1);
+				//exit(1);
 			}	
 			break;
 
 		case NODE_AFFECT: //
 			analyse_passe_1(root->opr[0]);
 			analyse_passe_1(root->opr[1]);
-			//ERREUR A GERER
+			//##############################################################################################################################ERREUR A GERER
 			root->type = root->opr[0]->type;
 			break;
 		case NODE_FUNC:
 
+			reset_temporary_max_offset();
 			reset_env_current_offset();
 			analyse(root, root->nops);
 			root->offset = get_env_current_offset();
@@ -91,6 +94,12 @@ void analyse_passe_1(node_t root) {
 		case NODE_DECL:
 			root->opr[0]->offset=env_add_element(root->opr[0]->ident,root->opr[0]);
 			analyse(root, root->nops);
+
+			if(root->opr[1]->ident!=NULL){
+
+
+
+			};
 			break;
 
 		case NODE_TYPE:
