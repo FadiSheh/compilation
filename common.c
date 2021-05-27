@@ -1,4 +1,3 @@
-
 #include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -17,97 +16,117 @@
 extern char * infile;
 extern char * outfile;
 int32_t trace_level = DEFAULT_TRACE_LEVEL;
-extern bool stop_after_syntax;
+extern bool stop_after_syntax;  
 extern bool stop_after_verif;
 
 
 void parse_args(int argc, char ** argv) {
-    // A implementer (la ligne suivante est a changer)
-    infile = argv[1];
-    int flag = 0;
+    /*if(argc == 2){
+        infile = argv[1];
+    }*/
+    //infile = argv[1];
+    int flag1 = 0;
     char c;
+    int reg;
     int trace = 0;
-    int i = 0;
+    //printf("argc : %d\n", argc);
+    if(argc == 1){
+        fprintf(stderr, "Options disponibles:\n-b\n-o\n-t\n-r\n-s\n-v\n-h\n");
+        exit(1);
+    }
     while( (c=getopt(argc, argv, "bo:t:r:svh")) != EOF )
     {
         switch(c){
             case 'b':
-                if(i==0){
+                if(argc == 2){
                     //affichage de la banniere
                     printf("==================\n");
-                    printf(" BEST COMPILATEUR\n");
+                    printf("    COMPILATEUR\n");
                     printf("  FADI ET AMELIE\n");
                     printf("==================\n");
                     exit(1);
                 }
                 else{
                     //message d'erreur
-                    printf("erreur\n");
+                    printf("erreur : -b s'utilise seule\n");
                     exit(1);
                 }
                 break;
             case 'o':
                 //défini fichier assembleur produit
                 infile = optarg;
-                i++;
                 break;
             case 't':
                 //definit le niveau de trace à utiliser
                 trace = atoi(optarg);
                 if (trace >= 0 && trace <= 5){
                     trace_level = atoi(optarg);
-                    i++;
                 }
                 else{
-                    trace_level = 0;
-                    i++;
+                    printf("erreur : valeur incorrecte pour -t\n");
+                    exit(1);
                 }
                 break;
             case 'r':
                 //definit nombre max de registres a utiliser
-                i++;
+                reg = atoi(optarg);
+                if(reg >= 4 && reg <= 8){
+                    set_max_registers(reg);
+                }
+                else{
+                    printf("erreur : valeur incorrecte pour -r\n");
+                    exit(1);
+                }
                 break;
             case 's':
-                if(flag){
+                if(flag1){
                     //message d'erreur
-                    printf("erreur\n");
-                    i++;
+                    printf("erreur : -s et -v sont incompatibles\n");
                     exit(1);
-
                 }
                 else{
                     //arrete compilation apres analyse syntaxique
                     stop_after_syntax = false;
-                    flag = 1;
-                    i++;
+                    flag1 = 1;
                 }
                 break;
             case 'v':
-                if(flag){
+                if(flag1){
                     //message d'erreur
-                    printf("erreur\n");
-                    i++;
+                    printf("erreur : -v et -s sont incompatibles\n");
                     exit(1);
                 }
                 else{
                     //arrete compilation apres passe de verification
                     stop_after_verif = false;
-                    flag = 1;
-                    i++;
+                    flag1 = 1;
                 }
                 break;
             case 'h':
                 //afficher liste des options et arreter parsing des arguments
-                fprintf(stderr, "Options:\n-b \n-o \n-t \n-r\n-s\n-v\n-h\n");
+                fprintf(stderr, "Options:\n-b   afficher banniere\n-o   definir nom fichier assembleur\n-t   definir niveau de trace\n-r   definir nombre max de registres\n-s   arreter compilation apres analyse syntaxique\n-v   arreter compilation apres passe de verification\n-h   afficher liste des options\n");
+                exit(1);
                 break;
+            case '?':
+                fprintf(stderr, "Ligne de commande incorrecte.\n");
+                exit(1);
             default:
                 break;
-            i++;
         }
-        printf("-%c\n",(char) c);
+        //printf("-%c\n",(char) c);
 
     }
-    printf("parse done\n");
+    infile = argv[optind];
+    printf("optind : %d\n", optind);
+    printf("argc : %d\n", argc);
+    if(optind == argc){
+        printf("erreur : il manque un fichier\n");
+        exit(1);
+    }
+    if(optind < argc - 1){
+        printf("erreur : trop de fichiers\n");
+        exit(1);
+    }    
     //exit(1);
 }
 
