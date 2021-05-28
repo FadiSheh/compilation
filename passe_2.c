@@ -1,111 +1,122 @@
-
 #include <stdio.h>
 
 #include "defs.h"
 #include "passe_2.h"
 
-
+int aff = 0;
 //int flag = 0;
 void gen_code_passe_2(node_t root) {
-	
-	//printf("helloworld\n");
-	if(!root){
-		printf("Arbre est vide\n");
-	}
-	//déclaration des chaines litterales en section .data
-	//get_new_label() (int)
-	//label pt prog : entier
-	//label directive (.word)
+    
+    //printf("helloworld\n");
+    if(!root){
+        printf("Arbre est vide\n");
+    }
+    //déclaration des chaines litterales en section .data
+    //get_new_label() (int)
+    //label pt prog : entier
+    //label directive (.word)
 
-	else{
-		switch(root->nature){
-			case NODE_PROGRAM:
-				printf("helloworld\n");
-				create_program();
-				create_inst_data_sec();
-				/*.data
-				start :
-				end:
-				.asciiz
+    else{
+        switch(root->nature){
+            case NODE_PROGRAM:
+                printf("helloworld\n");
+                create_program();
+                create_inst_data_sec();
+                /*.data
+                start :
+                end:
+                .asciiz
+                .text
+                main:*/
+                //flag=1;
+                ajoutStrings(get_global_strings_number());
+                gen_code_passe_2(root->opr[0]);
+                
+                create_inst_text_sec();
+                gen_code_passe_2(root->opr[1]);
 
-				.text
-				main:*/
-				//flag=1;
-				gen_code_passe_2(root->opr[0]);
-				//flag=0;
-				create_inst_text_sec();
-				gen_code_passe_2(root->opr[1]);
-			
-				break;
-			case NODE_BLOCK: 
-
-
-			if(root->opr[0] != NULL){
-				
-			}
-			if(root->opr[1] != NULL){
-				
-			}
-
-			break;
-
-		case NODE_IDENT: //
-
-			/*if (flag==1){
+                create_inst_ori(2,0,10);
+                create_inst_syscall();
+            
+                break;
+            case NODE_BLOCK: 
 
 
-			} else {
-			}*/
-			
+            if(root->opr[0] != NULL){
+                gen_code_passe_2(root->opr[0]);
+                
+            }
+            if(root->opr[1] != NULL){
+                gen_code_passe_2(root->opr[1]);
+                
+            }
 
-			break;
+            break;
 
-		case NODE_AFFECT: //
+        case NODE_IDENT: //
 
-			break;
-		case NODE_FUNC:
-			//p.II-9/10
-			set_temporary_start_offset();
-		//II-10
-			create_inst_stack_allocation();
-			gen_code_passe_2(root->opr[0]);
-			gen_code_passe_2(root->opr[1]);
-			gen_code_passe_2(root->opr[2]);
-			//place à allouer en pile
-			//somme entre offset du noeud NODE_FUNC et valeur 8
-			//+place variables locales ? II-9
-			create_inst_stack_deallocation(get_temporary_max_offset());
-			break;
+            /*if (flag==1){
+            } else {
+            }*/
+            
 
-		case NODE_LIST:
-			gen_code_passe_2(root->opr[0]);
-			gen_code_passe_2(root->opr[1]);
-			break;
-		case NODE_DECLS:
-			gen_code_passe_2(root->opr[1]);
-			break;
+            break;
 
-		case NODE_DECL:
-			create_inst_word(root->opr[0]->ident, root->opr[1]->value);
-			break;
+        case NODE_AFFECT: //
 
-		case NODE_TYPE:
+            break;
+        case NODE_FUNC:
+            //p.II-9/10
+            set_temporary_start_offset(root->offset);
+        //II-10
+            create_inst_stack_allocation();
+            gen_code_passe_2(root->opr[0]);
+            gen_code_passe_2(root->opr[1]);
+            gen_code_passe_2(root->opr[2]);
+            //place à allouer en pile
+            //somme entre offset du noeud NODE_FUNC et valeur 8
+            //+place variables locales ? II-9
+            create_inst_stack_deallocation(get_temporary_max_offset());
+            break;
 
-			break;
-		case NODE_INTVAL:
+        case NODE_LIST:
+            printf("NODE_LIST");
+            gen_code_passe_2(root->opr[0]);
+            gen_code_passe_2(root->opr[1]);
+            break;
 
-			break;
-		case NODE_BOOLVAL:
+        case NODE_DECLS:
+            gen_code_passe_2(root->opr[1]);
+            break;
 
-			break;
-		case NODE_STRINGVAL:
+        case NODE_DECL:
+            create_inst_word(root->opr[0]->ident, root->opr[1]->value);
+            break;
 
-			break;
-		default:
-			break;
-			
+        case NODE_PRINT:
+            create_inst_lui(4,0x1001);
+            create_inst_ori(4,4,(0+aff)*4);
+            aff++;
+            create_inst_ori(2,0,4);
+            create_inst_syscall();
 
-		}
-	}
+            break;
+        default:
+            break;
+            
 
+        
+    }
+
+}
+
+
+}
+
+
+void ajoutStrings(int nb){
+
+    for (int i =0;i<nb;i++){
+        create_inst_asciiz(NULL,get_global_string(i));
+    }
 }
