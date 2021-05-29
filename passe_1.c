@@ -4,13 +4,15 @@
 #include "defs.h"
 #include "passe_1.h"
 #include "common.h"
+#include <string.h>
 #include "utils/miniccutils.h"
 extern int trace_level;
 node_type dernier_type = TYPE_NONE;
 int flag =0;
-
+node_t tmp;
 void analyse_passe_1(node_t root) {
-	//printf("helloworld\n");
+	
+	printf("NATURE: %s\n",node_nature2string(root->nature));
 	if(!root){
 		//printf("Arbre est vide\n");
 
@@ -27,7 +29,7 @@ void analyse_passe_1(node_t root) {
 			analyse_passe_1(root->opr[0]);
 			flag=0;
 			analyse_passe_1(root->opr[1]);
-			
+			printf("ICI\n");
 
 			break;
 
@@ -48,43 +50,69 @@ void analyse_passe_1(node_t root) {
 
 		case NODE_IDENT: //
 
-			if (flag==1){
+	
 
-				root->global_decl =true;
+			if(root && strcmp(root->ident,"main") != 0 ){
 
-			} else {root->global_decl =false;}
 
-			root->type = dernier_type;
-			node_t tmp;
-			tmp = get_decl_node(root->ident);
+
+				if (flag==1){
+
+					root->global_decl =true;
+
+				} else {
+
+					root->global_decl =false;
+				}
+
+				if(root->offset<0){
+				//Variable existe deja?
+					fprintf(stderr, "Error line %d: variable existe deja\n", root->lineno);
+					exit(1);
+
+				}
+
+				root->type = dernier_type;
 			
-			if (tmp){
-				root->decl_node = tmp;
-				root->type=tmp->type;
+				tmp = get_decl_node(root->ident);
+			
+				if (tmp){
+					root->decl_node = tmp;
+					root->type=tmp->type;
+					}
 
-			}	
-			else {
-				//root->offset = get_env_current_offset();
-				//fprintf(stderr, "Error line %d: Operation not permitted\n", root->lineno-1);
-				//exit(1);
-			}	
+					else {
+
+				fprintf(stderr, "Error line %d: variable nn definie\n", root->lineno);
+					exit(1);
+			
+			} 
+			}
+
 			break;
 
 		case NODE_AFFECT: //
-			analyse_passe_1(root->opr[0]);
-			analyse_passe_1(root->opr[1]);
+
+			//analyse_passe_1(root->opr[0]);
+			//analyse_passe_1(root->opr[1]);
+			analyse(root, root->nops);
 			//##############################################################################################################################ERREUR A GERER
 			root->type = root->opr[0]->type;
+
+			undeclVar(root);
+
 			break;
 		case NODE_FUNC:
 
 			reset_temporary_max_offset();
 			reset_env_current_offset();
+			errorMain(root);
 			analyse(root, root->nops);
 			root->offset = get_env_current_offset();
 			break;
 
 		case NODE_LIST:
+
 			analyse(root, root->nops);
 			break;
 		case NODE_DECLS:
@@ -93,13 +121,10 @@ void analyse_passe_1(node_t root) {
 
 		case NODE_DECL:
 			root->opr[0]->offset=env_add_element(root->opr[0]->ident,root->opr[0]);
+		
 			analyse(root, root->nops);
+		
 
-			if(root->opr[1]->ident!=NULL){
-
-
-
-			};
 			break;
 
 		case NODE_TYPE:
@@ -116,6 +141,7 @@ void analyse_passe_1(node_t root) {
 		case NODE_STRINGVAL:
 			root->type = TYPE_STRING;
 			root-> offset = add_string(root->str);
+			printf("EXIT NODE_STRINGVAL\n");
 			break;
 
 		//type de tous les noeuds des opérateurs
@@ -251,17 +277,20 @@ void analyse_passe_1(node_t root) {
 			analyse(root, root->nops);
 			break;
 		default:
+		
 		analyse(root, root->nops);
+
 			break;
+		}
 	}
-	}
-	//printf("finito %d\n", cpt++);
+	
 }
 
 
 void analyse(node_t node, int nops){
 	for (int i = 0; i<nops; i++){
-		analyse_passe_1(node->opr[i]);
+		if(node->opr[i]){
+		analyse_passe_1(node->opr[i]);}
 	}
 }
 
@@ -330,4 +359,36 @@ void errorCOND(node_t node){
 
 	}
 
+}
+
+void undeclVar(node_t node){
+
+			if ( node->type ==TYPE_VOID ) { 
+				fprintf(stderr, "Error line %d: Oubli type de variable pour %s\n", node->lineno,node->opr[0]->ident);
+				exit(1);}
+
+			else if(node->opr[0]->type==node->opr[1]->type){
+
+				tmp = get_decl_node(node->opr[0]->ident);
+
+				if ((!tmp && (node->opr[0]->global_decl==false)) ){
+					//variable nexiste pas dans le context
+					//printf("Nexiste pas dans le contexte courant ni en globale");
+					fprintf(stderr, "Error line %d: Oubli type de variable pour %s\n", node->lineno,node->opr[0]->ident);
+					exit(1);
+
+				}	
+
+			
+
+			}
+}
+
+void errorMain(node_t root){
+	if (root->opr[0]->type!=TYPE_VOID){
+
+		fprintf(stderr, "Error line %d: Main must be TYPE_VOID, here tpye %s.\n", root->lineno,node_type2string(root->opr[0]->type));
+		exit(1);
+
+	}
 }
