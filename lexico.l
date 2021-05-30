@@ -1,14 +1,13 @@
 %{
 #define Return(X) {\
-	printf("line %d, token " #X "\n", yylineno);\
 	return X;\
 }
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-
 #include "defs.h"
 #include "common.h"
+#include <inttypes.h>
 
 #include "y.tab.h"
 
@@ -91,13 +90,21 @@ COMMENTAIRE     \/\/.*
 
 {ENTIER} {
                 /* A completer : affecter yylval.intval et faire des verifications */
-				yylval.intval = atoi(yytext); /*permet de transformer une chaine de caracteres en une donnee de type int*/
+                if (strcmp(yytext,"4294967296")>=0 && strlen(yytext)==10){
+
+                   fprintf(stderr, "Error line %d: out of range\n", yylineno);
+                    exit(1);
+                }
+              
+                yylval.intval=atoi(yytext);
+                printf("%d \n",yylval.intval);
                 Return(TOK_INTVAL);
 }
 
 {CHAINE} {
                 /* A completer : affecter yylval.strval */
 				yylval.strval = strdup(yytext);
+               
                 Return(TOK_STRING);
 }
 
@@ -132,6 +139,7 @@ int main(int argc, char ** argv) {
     yyparse(&program_root);
     fclose(yyin);
     analyse_tree(program_root);
+    //check_program_tree(program_root);
     yylex_destroy();
     return 0;
 }
