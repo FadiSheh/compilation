@@ -10,6 +10,7 @@ void recup_offset(node_t root, int32_t i);
 void allocate2(void (*mon_ope)());
 void allocate2_sw(void (*mon_ope)());
 void allocate2_imm(void (*mon_ope)());
- 
+void ajoutStrings(int nb);
+void ajoutInstancePrint(int emplacement);
+void syscallExit();
 #endif
-
