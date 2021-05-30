@@ -63,6 +63,7 @@ void parse_args(int argc, char ** argv) {
             case 't':
                 //definit le niveau de trace à utiliser
                 trace = atoi(optarg);
+                printf("trace %d",trace);
                 if (trace >= 0 && trace <= 5){
                     trace_level = atoi(optarg);
                 }
@@ -74,6 +75,7 @@ void parse_args(int argc, char ** argv) {
             case 'r':
                 //definit nombre max de registres a utiliser
                 reg = atoi(optarg);
+                printf("Registre: %d ",reg);
                 if(reg >= 4 && reg <= 8){
                     set_max_registers(reg);
                 }
@@ -90,7 +92,8 @@ void parse_args(int argc, char ** argv) {
                 }
                 else{
                     //arrete compilation apres analyse syntaxique
-                    stop_after_syntax = false;
+                    printf("FINIR APRES SYNTAXIQUE\n");
+                    stop_after_syntax = true;
                     flag1 = 1;
                 }
                 break;
@@ -102,7 +105,8 @@ void parse_args(int argc, char ** argv) {
                 }
                 else{
                     //arrete compilation apres passe de verification
-                    stop_after_verif = false;
+                    printf("FINIR APRES PASSE VERIF\n");
+                    stop_after_verif = true;
                     flag1 = 1;
                 }
                 break;
