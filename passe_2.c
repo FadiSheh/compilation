@@ -1,13 +1,14 @@
-
 #include <stdio.h>
 #include "common.h"
 #include "defs.h"
 #include "passe_2.h"
 #include "utils/miniccutils.h"
-
+#include <string.h>
 int l1;
 int l2;
 int flagp2 = 0;
+int aff=0;
+int flagprint = 1;
 node_type dernier_type2 = TYPE_NONE;
 int32_t reg_to_free;
 int32_t a;
@@ -15,38 +16,42 @@ int32_t b;
 int r1;
 int r2;
 int r3;
+
+int offsetFunc = 0;
 //int flagp3 = 0;
 
 void gen_code_passe_2(node_t root) {
-	//printf("helloworld\n");
+
 	if(!root){
 		printf("Arbre est vide\n");
 	}
-	//déclaration des chaines litterales en section .data
-	//get_new_label() (int)
-	//label pt prog : entier
-	//label directive (.word)
-
 
 	else{
-		printf("Nature : %s\n", node_nature2string(root->nature));
+		//printf("Nature : %s\n", node_nature2string(root->nature));
+		//printf("TYPE : %s\n\n", node_type2string(root->type));
 		switch(root->nature){
+
 			case NODE_PROGRAM:
-				printf("helloworld\n");
+
 				create_program();
 				create_inst_data_sec(); 
-				flagp2 = 1;
-
+				flagp2 = 1; //global
 				gen_code_passe_2(root->opr[0]);
 
-				flagp2=0;
+				//ajout des string dans .data
+				ajoutStrings(get_global_strings_number());
+				
+				
+
+
+				flagp2=0; //pas global
+
 				create_inst_text_sec();
 				gen_code_passe_2(root->opr[1]);
 				//syscall
-				create_inst_comment("exit");
-				create_inst_ori(2,0,0x1010);
-				create_inst_syscall();
+				syscallExit();
 				break;
+
 			case NODE_BLOCK: 
 				gen_code_passe_2(root->opr[0]);
 				gen_code_passe_2(root->opr[1]);
@@ -54,6 +59,20 @@ void gen_code_passe_2(node_t root) {
 				break;
 
 		case NODE_IDENT: 
+
+			if(flagprint==0 && flagp2==0){
+				//##################################################################################################################
+				create_inst_comment("PRINT VARIABLE  ");
+				int offsetp = root->offset;
+
+				if(root->decl_node){
+					offsetp = root->decl_node->offset;
+				}
+					create_inst_lw(4,offsetp,29);
+					create_inst_ori(2,0,0x1);
+    				create_inst_syscall();
+  
+			}
 
 			break;
 
@@ -99,6 +118,7 @@ void gen_code_passe_2(node_t root) {
 				//variable globale
 				if(root->opr[0] != NULL && root->opr[1] != NULL){
 					create_inst_word(root->opr[0]->ident, root->opr[1]->value);
+					aff=aff+4;
 				}
 			}
 			else{
@@ -117,8 +137,8 @@ void gen_code_passe_2(node_t root) {
 						create_inst_comment("declaration");
 						if(reg_available()){
 							allocate_reg();
-							create_inst_ori(get_current_reg(),0x0, root->opr[1]->value);
-							create_inst_sw(get_current_reg(), root->opr[0]->offset, 29);
+							create_inst_ori(get_current_reg()-1,0x0, root->opr[1]->value);
+							create_inst_sw(get_current_reg()-1, root->opr[0]->offset, 29);
 							release_reg();
 						}
 						else{
@@ -139,9 +159,24 @@ void gen_code_passe_2(node_t root) {
 		case NODE_TYPE:
 			dernier_type2 = root->type;
 			break;
-		case NODE_STRINGVAL:
 
+
+
+		case NODE_STRINGVAL:
+				//########################################################################################################################################
+
+				create_inst_comment("PRINT");
+				create_inst_lui(4,0x1001);
+				printf("AFF %d\n", aff);
+    			create_inst_ori(4,4,aff);
+    			create_inst_ori(2,0,0x4);
+    			create_inst_syscall();
+    			printf("TAILLE CHAINE %ld\n",strlen(root->str));
+    			aff=aff+strlen(root->str)-1;
+				
 			break;
+
+
 		case NODE_PLUS:
 			if(root->opr[0]->nature == NODE_IDENT && root->opr[1]->nature == NODE_INTVAL){
 				create_inst_comment("i = i+1");
@@ -264,6 +299,11 @@ void gen_code_passe_2(node_t root) {
 
 			break;
 		case NODE_PRINT:
+
+			flagprint = 0;
+			gen_code_passe_2(root->opr[0]);
+			flagprint = 1 ;
+
 			break;
 		default:
 			break;
@@ -273,15 +313,43 @@ void gen_code_passe_2(node_t root) {
 	}
 }
 
+void syscallExit(){
+
+		create_inst_comment("exit");
+		create_inst_ori(2,0,0x10);
+		create_inst_syscall();
+}
+
+
+void ajoutStrings(int nb){
+
+    for (int i =0;i<nb;i++){
+        create_inst_asciiz(NULL,get_global_string(i));
+    }
+}
+
+void ajoutInstancePrint(int emplacement){
+
+	create_inst_comment("PRINT");
+	create_inst_lui(4,0x1001);
+	printf("\nemplacement %d\n", emplacement);
+    create_inst_ori(4,4,emplacement);
+    create_inst_ori(2,0,0x4);
+    create_inst_syscall();
+
+
+}
+
 void affectation(node_t root){
 	recup_offset(root->opr[1], 1);
 	recup_offset(root->opr[0], 2);
 	//printf("a dans aff = %d\n", a);
 	//printf("b dans aff = %d\n", b);
 	if(reg_available()){
+		int regist = get_current_reg();
 		allocate_reg();
-		create_inst_lw(get_current_reg(), a, get_current_reg());
-		create_inst_sw(get_current_reg(), b, 29);
+		create_inst_lw(regist, a, 29);
+		create_inst_sw(regist, b, 29);
 		release_reg();
 	}
 	else{
@@ -297,10 +365,11 @@ void declaration_affectation(node_t root){
 	recup_offset(root->opr[1], 1);
 	recup_offset(root->opr[0], 2);
 	if(reg_available()){
+		int regist = get_current_reg();
 		allocate_reg();
-		create_inst_lui(get_current_reg(),0x1001);
-		create_inst_lw(get_current_reg(), a, get_current_reg());
-		create_inst_sw(get_current_reg(), b, 29);
+		create_inst_lui(regist,0x1001);
+		create_inst_lw(regist, a, regist);
+		create_inst_sw(regist, b, 29);
 		release_reg();
 	}
 	else{
@@ -330,12 +399,13 @@ void recup_offset(node_t root, int32_t i){
 
 void allocate2(void (*mon_ope)()){
 	if(reg_available()){
-		allocate_reg();
+		
 		r1 = get_current_reg();
+		allocate_reg();
 	
 		if(reg_available()){
-			allocate_reg();
 			r2 = get_current_reg();
+			allocate_reg();
 			create_inst_lw(r1, a, 29);
 			create_inst_lw(r2, b, 29);
 			mon_ope(r1, r1, r2);
@@ -357,8 +427,9 @@ void allocate2(void (*mon_ope)()){
 		push_temporary(reg_to_free);
 		r1 = get_current_reg();
 		if(reg_available()){
-			allocate_reg();
+
 			r2 = get_current_reg();
+			allocate_reg();
 			create_inst_lw(r1, a, 29);
 			create_inst_lw(r2, b, 29);
 			mon_ope(r1, r1, r2);
@@ -379,12 +450,14 @@ void allocate2(void (*mon_ope)()){
 
 void allocate2_sw(void (*mon_ope)()){
 	if(reg_available()){
-		allocate_reg();
+		
 		r1 = get_current_reg();
-	
+		allocate_reg();
 		if(reg_available()){
-			allocate_reg();
+
 			r2 = get_current_reg();
+			allocate_reg();
+			
 			create_inst_lw(r1, a, 29);
 			create_inst_lw(r2, b, 29);
 			mon_ope(r1, r1, r2);
@@ -408,8 +481,10 @@ void allocate2_sw(void (*mon_ope)()){
 		push_temporary(reg_to_free);
 		r1 = get_current_reg();
 		if(reg_available()){
-			allocate_reg();
+
 			r2 = get_current_reg();
+			allocate_reg();
+			
 			create_inst_lw(r1, a, 29);
 			create_inst_lw(r2, b, 29);
 			mon_ope(r1, r1, r2);
@@ -432,12 +507,15 @@ void allocate2_sw(void (*mon_ope)()){
 
 void allocate2_imm(void (*mon_ope)()){
 	if(reg_available()){
-		allocate_reg();
+
 		r1 = get_current_reg();
+		allocate_reg();
+		
 	
 		if(reg_available()){
-			allocate_reg();
 			r2 = get_current_reg();
+			allocate_reg();
+			
 			create_inst_lw(r1, a, 29);
 			mon_ope(r1, r1, r3);
 			create_inst_addu(r1, r1, r2);
