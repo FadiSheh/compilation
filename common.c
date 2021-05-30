@@ -57,7 +57,8 @@ void parse_args(int argc, char ** argv) {
                 break;
             case 'o':
                 //défini fichier assembleur produit
-                infile = optarg;
+                //infile = optarg;
+                outfile = optarg;
                 break;
             case 't':
                 //definit le niveau de trace à utiliser
