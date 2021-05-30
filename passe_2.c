@@ -16,6 +16,8 @@ int32_t b;
 int r1;
 int r2;
 int r3;
+bool flagR1 = false;
+bool flagR2 = false;
 
 int offsetFunc = 0;
 //int flagp3 = 0;
@@ -184,30 +186,168 @@ void gen_code_passe_2(node_t root) {
 				recup_offset(root->opr[0], 1);
 				r3 = root->opr[1]->value;
 				printf("imm = %d\n", r3);
-				allocate2_imm(create_inst_ori);
+				r1 = return_reg1(r1);
+				create_inst_lw(r1, a, 29);
+				create_inst_ori(r1, get_r0(), r3);
+				create_inst_addu(r1, r1, r2);
+				create_inst_sw(r1, a, 29);
+				liberer_reg(flagR1);
 			}
 			else if(root->opr[0]->nature == NODE_IDENT && root->opr[1]->nature == NODE_IDENT){
 				create_inst_comment("sum = sum + i");
 				recup_offset(root->opr[0], 1);
 				recup_offset(root->opr[1], 2);
-				allocate2_sw(create_inst_addu);
+				r1 = return_reg1(r1);
+				r2 = return_reg2(r2);
+				create_inst_lw(r1, a, 29);
+				create_inst_lw(r2, b, 29);
+				create_inst_addu(r1, r1, r2);
+				create_inst_sw(r1, a, 29);
+				liberer_reg(flagR1);
+				liberer_reg(flagR2);
 			}
 			else{
-				//deux intval
-
+				gen_code_passe_2(root->opr[0]);
+				gen_code_passe_2(root->opr[1]);
 			}
 			break;
 		case NODE_MINUS:
-
+			if(root->opr[0]->nature == NODE_IDENT && root->opr[1]->nature == NODE_INTVAL){
+				create_inst_comment("i = i+1");
+				printf("i = i + 1\n");
+				recup_offset(root->opr[0], 1);
+				r3 = root->opr[1]->value;
+				printf("imm = %d\n", r3);
+				r1 = return_reg1(r1);				create_inst_lw(r1, a, 29);
+				create_inst_ori(r1, get_r0(), r3);
+				create_inst_subu(r1, r1, r2);
+				create_inst_sw(r1, a, 29);
+				liberer_reg(flagR1);
+			}
+			else if(root->opr[0]->nature == NODE_IDENT && root->opr[1]->nature == NODE_IDENT){
+				create_inst_comment("sum = sum + i");
+				recup_offset(root->opr[0], 1);
+				recup_offset(root->opr[1], 2);
+				r1 = return_reg1(r1);
+				r2 = return_reg2(r2);
+				create_inst_lw(r1, a, 29);
+				create_inst_lw(r2, b, 29);
+				create_inst_subu(r1, r1, r2);
+				create_inst_sw(r1, a, 29);
+				liberer_reg(flagR1);
+				liberer_reg(flagR2);
+			}
+			else{
+				gen_code_passe_2(root->opr[0]);
+				gen_code_passe_2(root->opr[1]);
+			}
 			break;
 		case NODE_MUL:
-
+			if(root->opr[0]->nature == NODE_IDENT && root->opr[1]->nature == NODE_INTVAL){
+				create_inst_comment("i = i*1");
+				printf("i = i * 1\n");
+				recup_offset(root->opr[0], 1);
+				r3 = root->opr[1]->value;
+				printf("imm = %d\n", r3);
+				r1 = return_reg1(r1);
+				r2 = return_reg2(r2);	
+				create_inst_lw(r1, a, 29);
+				create_inst_ori(r2, get_r0(), r3);
+				create_inst_mult(r1, r2);
+				create_inst_mfhi(r1);
+				create_inst_sw(r1, a, 29);
+				liberer_reg(flagR1);
+				liberer_reg(flagR2);
+			}
+			else if(root->opr[0]->nature == NODE_IDENT && root->opr[1]->nature == NODE_IDENT){
+				create_inst_comment("sum = sum + i");
+				recup_offset(root->opr[0], 1);
+				recup_offset(root->opr[1], 2);
+				r1 = return_reg1(r1);
+				r2 = return_reg2(r2);
+				create_inst_lw(r1, a, 29);
+				create_inst_lw(r2, b, 29);
+				create_inst_mult(r1, r2);
+				create_inst_mfhi(r1);
+				create_inst_sw(r1, a, 29);
+				liberer_reg(flagR1);
+				liberer_reg(flagR2);
+			}
+			else{
+				gen_code_passe_2(root->opr[0]);
+				gen_code_passe_2(root->opr[1]);
+			}
 			break;
 		case NODE_DIV:
-
+			if(root->opr[0]->nature == NODE_IDENT && root->opr[1]->nature == NODE_INTVAL){
+				create_inst_comment("i = i+1");
+				printf("i = i + 1\n");
+				recup_offset(root->opr[0], 1);
+				r3 = root->opr[1]->value;
+				printf("imm = %d\n", r3);
+				r1 = return_reg1(r1);
+				r2 = return_reg2(r2);				
+				create_inst_lw(r1, a, 29);
+				create_inst_ori(r2, get_r0(), r3);
+				create_inst_div(r1, r2);
+				create_inst_mflo(r1);
+				create_inst_sw(r1, a, 29);
+				liberer_reg(flagR1);
+			}
+			else if(root->opr[0]->nature == NODE_IDENT && root->opr[1]->nature == NODE_IDENT){
+				create_inst_comment("sum = sum + i");
+				recup_offset(root->opr[0], 1);
+				recup_offset(root->opr[1], 2);
+				r1 = return_reg1(r1);
+				r2 = return_reg2(r2);
+				create_inst_lw(r1, a, 29);
+				create_inst_lw(r2, b, 29);
+				create_inst_div(r1, r2);
+				create_inst_mflo(r1);
+				create_inst_sw(r1, a, 29);
+				liberer_reg(flagR1);
+				liberer_reg(flagR2);
+			}
+			else{
+				gen_code_passe_2(root->opr[0]);
+				gen_code_passe_2(root->opr[1]);
+			}
 			break;
 		case NODE_MOD:
-
+			if(root->opr[0]->nature == NODE_IDENT && root->opr[1]->nature == NODE_INTVAL){
+				create_inst_comment("i = i+1");
+				printf("i = i + 1\n");
+				recup_offset(root->opr[0], 1);
+				r3 = root->opr[1]->value;
+				printf("imm = %d\n", r3);
+				r1 = return_reg1(r1);	
+				r2 = return_reg2(r2);			
+				create_inst_lw(r1, a, 29);
+				create_inst_ori(r2, get_r0(), r3);
+				create_inst_div(r1, r2);
+				create_inst_mfhi(r1);
+				create_inst_sw(r1, a, 29);
+				liberer_reg(flagR1);
+				liberer_reg(flagR2);
+			}
+			else if(root->opr[0]->nature == NODE_IDENT && root->opr[1]->nature == NODE_IDENT){
+				create_inst_comment("sum = sum + i");
+				recup_offset(root->opr[0], 1);
+				recup_offset(root->opr[1], 2);
+				r1 = return_reg1(r1);
+				r2 = return_reg2(r2);
+				create_inst_lw(r1, a, 29);
+				create_inst_lw(r2, b, 29);
+				create_inst_div(r1, r2);
+				create_inst_mfhi(r1);
+				create_inst_sw(r1, a, 29);
+				liberer_reg(flagR1);
+				liberer_reg(flagR2);
+			}
+			else{
+				gen_code_passe_2(root->opr[0]);
+				gen_code_passe_2(root->opr[1]);
+			}
 			break;
 		case NODE_IF:
 			gen_code_passe_2(root->opr[0]);
@@ -560,3 +700,69 @@ void allocate2_imm(void (*mon_ope)()){
 		pop_temporary(reg_to_free);	
 	}
 }
+
+int32_t return_reg1(int32_t r){
+	if(reg_available()){
+		r = get_current_reg();
+		allocate_reg();
+		flagR1 = true; //true allocate
+	}
+	else{
+		reg_to_free = get_restore_reg();
+		push_temporary(reg_to_free);
+		r = get_current_reg();
+		flagR1 = false;
+	}
+	return r;
+}
+
+int32_t return_reg2(int32_t r){
+	if(reg_available()){
+		r = get_current_reg();
+		allocate_reg();
+		flagR2 = true; //true allocate
+	}
+	else{
+		reg_to_free = get_restore_reg();
+		push_temporary(reg_to_free);
+		r = get_current_reg();
+		flagR2 = false;
+	}
+	return r;
+}
+
+void liberer_reg(bool drap){
+	if(drap){
+		release_reg();
+	}
+	else{
+		pop_temporary(reg_to_free);
+	}
+}
+/*	r1 = get_current_reg();
+		allocate_reg();
+		
+	
+		if(reg_available()){
+			r2 = get_current_reg();
+			allocate_reg();
+			
+			create_inst_lw(r1, a, 29);
+			mon_ope(r1, r1, r3);
+			create_inst_addu(r1, r1, r2);
+			create_inst_sw(r1, a, 29);
+			release_reg();
+		}
+		else{
+			reg_to_free = get_restore_reg();
+			push_temporary(reg_to_free);
+			r2 = get_current_reg();
+			create_inst_lw(r1, a, 29);
+			mon_ope(r1, r1, r2);
+			create_inst_addu(r1, r1, r2);
+			create_inst_sw(r1, a, 29);
+			pop_temporary(reg_to_free);
+		}
+		release_reg();
+	}
+}*/

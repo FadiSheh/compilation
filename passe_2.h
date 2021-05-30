@@ -13,4 +13,7 @@ void allocate2_imm(void (*mon_ope)());
 void ajoutStrings(int nb);
 void ajoutInstancePrint(int emplacement);
 void syscallExit();
+int32_t return_reg1(int32_t r);
+int32_t return_reg2(int32_t r);
+void liberer_reg(bool drap);
 #endif
