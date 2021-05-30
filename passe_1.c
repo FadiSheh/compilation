@@ -11,10 +11,12 @@ node_type dernier_type = TYPE_NONE;
 int flag =0; //0 global 1 sinon
 node_t tmp;
 int ligne;
+
 void analyse_passe_1(node_t root) {
 	ligne = root->lineno;
-	printf("NATURE: %s\n",node_nature2string(root->nature));
-	//printf("LIGNE %d \n",ligne);
+
+	if(trace_level==2 || trace_level>3){
+	printf("NATURE: %s\n",node_nature2string(root->nature));}
 	
 	if(!root){
 		//printf("Arbre est vide\n");
@@ -176,7 +178,10 @@ void analyse_passe_1(node_t root) {
 			break;
 		
 		case NODE_NOT: case NODE_UMINUS: case NODE_BNOT:
-			//errorNONCONST(flag);
+			
+			if(root->nature!=NODE_UMINUS){
+				errorNONCONST(flag);
+			}
 			analyse(root, root->nops);
 			root->type=type_op_unaire(root->nature,root->opr[0]->type);
 			break;
@@ -304,7 +309,7 @@ void undeclVar(node_t node){
 void errorMain(node_t root){
 	if (root->opr[0]->type!=TYPE_VOID){
 
-		fprintf(stderr, "Error line %d: Main must be TYPE_VOID, here type %s.\n", root->lineno,node_type2string(root->opr[0]->type));
+		fprintf(stderr, "Error line %d: Main must be TYPE_VOID, here type %s.\n", root->opr[0]->lineno,node_type2string(root->opr[0]->type));
 		exit(1);
 
 	}

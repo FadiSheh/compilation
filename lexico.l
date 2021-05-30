@@ -1,5 +1,8 @@
 %{
 #define Return(X) {\
+    extern int32_t trace_level;\
+    if(trace_level==1 || trace_level==5 ){\
+    printf("line %d, token " #X "\n", yylineno);}\
 	return X;\
 }
 #include <stdlib.h>
@@ -97,7 +100,7 @@ COMMENTAIRE     \/\/.*
                 }
               
                 yylval.intval=atoi(yytext);
-                printf("%d \n",yylval.intval);
+                //printf("%d \n",yylval.intval);
                 Return(TOK_INTVAL);
 }
 

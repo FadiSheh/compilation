@@ -63,7 +63,6 @@ void parse_args(int argc, char ** argv) {
             case 't':
                 //definit le niveau de trace à utiliser
                 trace = atoi(optarg);
-                printf("trace %d",trace);
                 if (trace >= 0 && trace <= 5){
                     trace_level = atoi(optarg);
                 }
@@ -92,7 +91,6 @@ void parse_args(int argc, char ** argv) {
                 }
                 else{
                     //arrete compilation apres analyse syntaxique
-                    printf("FINIR APRES SYNTAXIQUE\n");
                     stop_after_syntax = true;
                     flag1 = 1;
                 }
@@ -105,7 +103,6 @@ void parse_args(int argc, char ** argv) {
                 }
                 else{
                     //arrete compilation apres passe de verification
-                    printf("FINIR APRES PASSE VERIF\n");
                     stop_after_verif = true;
                     flag1 = 1;
                 }
@@ -129,12 +126,11 @@ void parse_args(int argc, char ** argv) {
             default:
                 break;
         }
-        //printf("-%c\n",(char) c);
+
 
     }
     infile = argv[optind];
-    //printf("optind : %d\n", optind);
-    //printf("argc : %d\n", argc);
+
     if(optind == argc){
         printf("erreur : il manque un fichier\n");
         exit(1);
@@ -142,8 +138,8 @@ void parse_args(int argc, char ** argv) {
     if(optind < argc - 1){
         printf("erreur : trop de fichiers\n");
         exit(1);
-    }    
-    //exit(1);
+    }
+
 }
 
 
