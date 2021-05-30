@@ -14,6 +14,7 @@ int32_t a;
 int32_t b;
 int r1;
 int r2;
+int r3;
 //int flagp3 = 0;
 
 void gen_code_passe_2(node_t root) {
@@ -33,16 +34,9 @@ void gen_code_passe_2(node_t root) {
 			case NODE_PROGRAM:
 				printf("helloworld\n");
 				create_program();
-				create_inst_data_sec();
+				create_inst_data_sec(); 
 				flagp2 = 1;
-				/*.data
-				start :
-				end:
-				.asciiz
 
-				.text
-				main:*/
-				//flag=1;
 				gen_code_passe_2(root->opr[0]);
 
 				flagp2=0;
@@ -54,9 +48,6 @@ void gen_code_passe_2(node_t root) {
 				create_inst_syscall();
 				break;
 			case NODE_BLOCK: 
-				//printf("yo\n");
-				//printf("dernier_type2 : %s\n", node_type2string(dernier_type2));
-				
 				gen_code_passe_2(root->opr[0]);
 				gen_code_passe_2(root->opr[1]);
 
@@ -70,8 +61,12 @@ void gen_code_passe_2(node_t root) {
 			if(root->opr[0]->nature == NODE_IDENT && root->opr[1]->nature == NODE_IDENT){
 					affectation(root);
 			} 
-			else{
+			else if(root->opr[0]->nature == NODE_IDENT && root->opr[1]->nature != NODE_IDENT){
 				//ajouter option quand ya un plus donc continuer de parcourir l'arbre
+				gen_code_passe_2(root->opr[0]);
+				gen_code_passe_2(root->opr[1]);
+			}
+			else{
 				declaration_affectation(root);
 			}
 			break;
@@ -102,9 +97,7 @@ void gen_code_passe_2(node_t root) {
 		case NODE_DECL:
 			if(flagp2 == 1){
 				//variable globale
-				printf("globale go\n");
 				if(root->opr[0] != NULL && root->opr[1] != NULL){
-					printf("globale here\n");
 					create_inst_word(root->opr[0]->ident, root->opr[1]->value);
 				}
 			}
@@ -129,11 +122,8 @@ void gen_code_passe_2(node_t root) {
 							release_reg();
 						}
 						else{
-							//push_temporary(reg);
-							//pop_temporary(reg);
+
 						}
-						//create_inst_ori(8, 0, 0);
-						//create_inst_sw(8, root->offset, 29);
 					}			
 				}
 				if(root->opr[0]!=NULL && root->opr[1] != NULL){
@@ -143,12 +133,6 @@ void gen_code_passe_2(node_t root) {
 					create_inst_comment("null");
 					//si un fils est null il y a rien à faire
 				}
-				//printf("dernier_type2 v2: %s\n", node_type2string(dernier_type2));
-				//printf("variable locale\n");
-				//lui - lw - sw
-				/*reate_inst_lui(8, 0x1001);
-				create_inst_lw(8, 0, 8);
-				create_inst_sw(8, 4, 29);*/
 			}
 
 			break;
@@ -161,17 +145,17 @@ void gen_code_passe_2(node_t root) {
 		case NODE_PLUS:
 			if(root->opr[0]->nature == NODE_IDENT && root->opr[1]->nature == NODE_INTVAL){
 				create_inst_comment("i = i+1");
-				/*create_inst_lw();
-				create_inst_ori();
-				create_inst_addu()
-				create_inst_sw();*/
+				printf("i = i + 1\n");
+				recup_offset(root->opr[0], 1);
+				r3 = root->opr[1]->value;
+				printf("imm = %d\n", r3);
+				allocate2_imm(create_inst_ori);
 			}
 			else if(root->opr[0]->nature == NODE_IDENT && root->opr[1]->nature == NODE_IDENT){
 				create_inst_comment("sum = sum + i");
-				/*create_inst_lw();
-				create_inst_lw();
-				create_inst_addu();
-				create_inst_sw();*/
+				recup_offset(root->opr[0], 1);
+				recup_offset(root->opr[1], 2);
+				allocate2_sw(create_inst_addu);
 			}
 			else{
 				//deux intval
@@ -205,10 +189,12 @@ void gen_code_passe_2(node_t root) {
 			create_inst_label(l1);
 			l2 = get_new_label();
 			printf("%d\n", l2);
+			//printf("Nature [1] dans for: %s\n", node_nature2string(root->opr[1]->nature));
 			gen_code_passe_2(root->opr[1]);
-			create_inst_comment("here");
-			gen_code_passe_2(root->opr[2]);
 			gen_code_passe_2(root->opr[3]);
+			//printf("Nature [1] dans for: %s\n", node_nature2string(root->opr[2]->nature));
+			gen_code_passe_2(root->opr[2]);
+			//printf("Nature [1] dans for: %s\n", node_nature2string(root->opr[3]->nature));
 			create_inst_comment("retour au test de boucle");
 			create_inst_j(l1);
 			create_inst_label(l2);
@@ -217,10 +203,10 @@ void gen_code_passe_2(node_t root) {
 
 			break;
 		case NODE_LT:
-			recup_offset(root->opr[1], a);
-			recup_offset(root->opr[0], b);
-			printf("a = %d\n", a);
-			printf("b = %d\n", b);
+			recup_offset(root->opr[0], 1);
+			recup_offset(root->opr[1], 2);
+			//printf("a = %d\n", a);
+			//printf("b = %d\n", b);
 			allocate2(create_inst_slt);
 			create_inst_beq(r1, 0, l2);
 			//nv label
@@ -290,8 +276,8 @@ void gen_code_passe_2(node_t root) {
 void affectation(node_t root){
 	recup_offset(root->opr[1], 1);
 	recup_offset(root->opr[0], 2);
-	printf("a dans aff = %d\n", a);
-	printf("b dans aff = %d\n", b);
+	//printf("a dans aff = %d\n", a);
+	//printf("b dans aff = %d\n", b);
 	if(reg_available()){
 		allocate_reg();
 		create_inst_lw(get_current_reg(), a, get_current_reg());
@@ -307,19 +293,22 @@ void affectation(node_t root){
 	}
 }
 void declaration_affectation(node_t root){
+	//printf("off1 : %d\n", root->opr[1]->offset);
+	recup_offset(root->opr[1], 1);
+	recup_offset(root->opr[0], 2);
 	if(reg_available()){
 		allocate_reg();
 		create_inst_lui(get_current_reg(),0x1001);
-		create_inst_lw(get_current_reg(), root->opr[1]->offset, get_current_reg());
-		create_inst_sw(get_current_reg(), root->opr[0]->offset, 29);
+		create_inst_lw(get_current_reg(), a, get_current_reg());
+		create_inst_sw(get_current_reg(), b, 29);
 		release_reg();
 	}
 	else{
 		reg_to_free = get_restore_reg();
 		push_temporary(reg_to_free);
 		create_inst_lui(reg_to_free, 0x1001);
-		create_inst_lw(reg_to_free, root->opr[1]->offset, reg_to_free);
-		create_inst_sw(reg_to_free, root->opr[0]->offset, 29);
+		create_inst_lw(reg_to_free, a, reg_to_free);
+		create_inst_sw(reg_to_free, b, 29);
 		pop_temporary(reg_to_free);
 	}
 }
@@ -382,6 +371,112 @@ void allocate2(void (*mon_ope)()){
 			create_inst_lw(r1, a, 29);
 			create_inst_lw(r2, b, 29);
 			mon_ope(r1, r1, r2);
+			pop_temporary(reg_to_free);		
+		}
+		pop_temporary(reg_to_free);	
+	}
+}
+
+void allocate2_sw(void (*mon_ope)()){
+	if(reg_available()){
+		allocate_reg();
+		r1 = get_current_reg();
+	
+		if(reg_available()){
+			allocate_reg();
+			r2 = get_current_reg();
+			create_inst_lw(r1, a, 29);
+			create_inst_lw(r2, b, 29);
+			mon_ope(r1, r1, r2);
+			create_inst_sw(r1, a, 29);
+			release_reg();
+		}
+		else{
+			reg_to_free = get_restore_reg();
+			push_temporary(reg_to_free);
+			r2 = get_current_reg();
+			create_inst_lw(r1, a, 29);
+			create_inst_lw(r2, b, 29);
+			mon_ope(r1, r1, r2);
+			create_inst_sw(r1, a, 29);
+			pop_temporary(reg_to_free);
+		}
+		release_reg();
+	}
+	else{
+		reg_to_free = get_restore_reg();
+		push_temporary(reg_to_free);
+		r1 = get_current_reg();
+		if(reg_available()){
+			allocate_reg();
+			r2 = get_current_reg();
+			create_inst_lw(r1, a, 29);
+			create_inst_lw(r2, b, 29);
+			mon_ope(r1, r1, r2);
+			create_inst_sw(r1, a, 29);
+			release_reg();
+		}
+		else{
+			reg_to_free = get_restore_reg();
+			push_temporary(reg_to_free);
+			r2 = get_current_reg();
+			create_inst_lw(r1, a, 29);
+			create_inst_lw(r2, b, 29);
+			mon_ope(r1, r1, r2);
+			create_inst_sw(r1, a, 29);
+			pop_temporary(reg_to_free);		
+		}
+		pop_temporary(reg_to_free);	
+	}
+}
+
+void allocate2_imm(void (*mon_ope)()){
+	if(reg_available()){
+		allocate_reg();
+		r1 = get_current_reg();
+	
+		if(reg_available()){
+			allocate_reg();
+			r2 = get_current_reg();
+			create_inst_lw(r1, a, 29);
+			mon_ope(r1, r1, r3);
+			create_inst_addu(r1, r1, r2);
+			create_inst_sw(r1, a, 29);
+			release_reg();
+		}
+		else{
+			reg_to_free = get_restore_reg();
+			push_temporary(reg_to_free);
+			r2 = get_current_reg();
+			create_inst_lw(r1, a, 29);
+			mon_ope(r1, r1, r2);
+			create_inst_addu(r1, r1, r2);
+			create_inst_sw(r1, a, 29);
+			pop_temporary(reg_to_free);
+		}
+		release_reg();
+	}
+	else{
+		reg_to_free = get_restore_reg();
+		push_temporary(reg_to_free);
+		r1 = get_current_reg();
+		if(reg_available()){
+			allocate_reg();
+			r2 = get_current_reg();
+			create_inst_lw(r1, a, 29);
+			mon_ope(r1, r1, r2);
+			create_inst_addu(r1, r1, r2);
+			create_inst_sw(r1, a, 29);
+			release_reg();
+		}
+		else{
+			reg_to_free = get_restore_reg();
+			push_temporary(reg_to_free);
+			r2 = get_current_reg();
+			create_inst_lw(r1, a, 29);
+			mon_ope(r1, r1, r2);
+			create_inst_addu(r1, r1, r2);
+			create_inst_sw(r1, a, 29);
 			pop_temporary(reg_to_free);		
 		}
 		pop_temporary(reg_to_free);	
