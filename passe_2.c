@@ -62,21 +62,34 @@ void gen_code_passe_2(node_t root) {
 
 
 			if(flagp2==0){
+
 				if(root->decl_node){
 					tmp2 = root->decl_node;
 				}
-			}
 			
+              
+				if(flagprint==0 ){
+				
+					if(tmp2->global_decl==true){
+						create_inst_comment("PRINT VARIABLE 1 ");
+						create_inst_lui(4,0x1001);
+						create_inst_lw(4,tmp2->offset,4);
+						create_inst_ori(2,0,0x1);
+						create_inst_syscall();  
+					} else {
 
-			if(flagprint==0 && flagp2==0){
-			
-				create_inst_comment("PRINT VARIABLE  ");
-				create_inst_lw(4,tmp2->offset,29);
-				create_inst_ori(2,0,0x1);
-				create_inst_syscall();  
+						create_inst_comment("PRINT VARIABLE  2");
+						create_inst_lw(4,tmp2->offset,29);
+						create_inst_ori(2,0,0x1);
+						create_inst_syscall();  
+
+
+					}
+
+				} 
+
 			}
 
-			
 			break;
 
 		case NODE_AFFECT:
@@ -165,9 +178,11 @@ void gen_code_passe_2(node_t root) {
 					//si un fils est null il y a rien à faire
 				}
 			}
-			
+			printf("TEST\n");
 			gen_code_passe_2(root->opr[0]);
+
 			gen_code_passe_2(root->opr[1]);
+
 			break;
 		case NODE_TYPE:
 			dernier_type2 = root->type;
@@ -194,14 +209,25 @@ void gen_code_passe_2(node_t root) {
 
 			r1 = return_reg1(r1);
 			r2 = return_reg2(r2);
-
-		
+			printf("\n NATURE TMP2 : %s", node_nature2string(tmp2->nature));
+			printf(" IDENT TMP2 : %s\n", tmp2->ident);
 			if(root->opr[0]->nature == NODE_IDENT && root->opr[1]->nature == NODE_INTVAL){
 
-				recup_offset(root->opr[0], 1);
-				create_inst_lw(r1, a, 29);
+
+				if(tmp2->global_decl==true){
+					printf("GLOBAL TRUE\n");
+
+					a=tmp2->offset;
+					create_inst_lw(r1,a,r1);
+				} else {
+					printf("GLOBAL FALSE\n");
+					recup_offset(root->opr[0], 1);
+					create_inst_lw(r1, a, 29);
+				}
+
 				create_inst_ori(r2, get_r0(), root->opr[1]->value);
 				ope_binaire(root,r1,r2);
+				
 			}
 			else if(root->opr[0]->nature == NODE_IDENT && root->opr[1]->nature == NODE_IDENT){
 				recup_offset(root->opr[0], 1);
