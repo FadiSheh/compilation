@@ -146,6 +146,7 @@ void gen_code_passe_2(node_t root) {
 				if(root->opr[0] != NULL && root->opr[1] != NULL){
 					create_inst_word(root->opr[0]->ident, root->opr[1]->value);
 					aff=aff+4;
+
 				}
 			}
 			else{
@@ -214,10 +215,11 @@ void gen_code_passe_2(node_t root) {
 			if(root->opr[0]->nature == NODE_IDENT && root->opr[1]->nature == NODE_INTVAL){
 
 
-				if(tmp2->global_decl==true){
+				if(root->opr[0]->decl_node->global_decl==true){
 					printf("GLOBAL TRUE\n");
 
 					a=tmp2->offset;
+					create_inst_lui(r1,0x1001);
 					create_inst_lw(r1,a,r1);
 				} else {
 					printf("GLOBAL FALSE\n");
