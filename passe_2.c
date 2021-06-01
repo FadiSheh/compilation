@@ -15,6 +15,7 @@ node_t tmp2;
 node_t tmp3;
 node_t tmp4;
 node_t tmp5;
+node_t tmp6;
 int32_t reg_to_free;
 int32_t a;
 int32_t b;
@@ -24,6 +25,8 @@ int r3;
 int gloc = 0;
 bool flagR1 = false;
 bool flagR2 = false;
+
+int flagenchainement = 0;
 
 int offsetFunc = 0;
 //int flagp3 = 0;
@@ -58,7 +61,13 @@ void gen_code_passe_2(node_t root) {
 
 		case NODE_IDENT: 
 
+		/*if (flagenchainement==1){
+			printf("\nDANS NODE IDENT POUR L'ADDITION\n");
+			create_inst_ori(r1, get_r0(), root->opr[0]->value);
+			ope_binaire(root,r1,r2);
 
+
+		}*/
 			if(flagp2==0){ //Si dans func
 
 				if(root->decl_node){
@@ -70,14 +79,14 @@ void gen_code_passe_2(node_t root) {
 				
 					if(tmp2->global_decl==true){
 
-						create_inst_comment("PRINT VARIABLE GLOBALE ");
+						//create_inst_comment("PRINT VARIABLE GLOBALE ");
 						create_inst_lui(4,0x1001);
 						create_inst_lw(4,tmp2->offset,4);
 						create_inst_ori(2,0,0x1);
 						create_inst_syscall();  
 					} else {
 
-						create_inst_comment("PRINT VARIABLE VARIABLE LOCALE");
+						//create_inst_comment("PRINT VARIABLE VARIABLE LOCALE");
 						create_inst_lw(4,tmp2->offset,29);
 						create_inst_ori(2,0,0x1);
 						create_inst_syscall();  
@@ -103,11 +112,40 @@ void gen_code_passe_2(node_t root) {
 					affectation(root);
 			} 
 			else if(root->opr[0]->nature == NODE_IDENT && root->opr[1]->nature != NODE_IDENT){
-				gen_code(root, root->nops);
+
+				//printf("ANALYSE DU FILS 2%s", node_nature2string(root->opr[1]->nature));
+				gen_code_passe_2(root->opr[1]);
+				//printf("ANALYSE DU FILS 1 %s", node_nature2string(root->opr[0]->nature));
+				gen_code_passe_2(root->opr[0]);
+
+	
+
+
+
+
+
+				if(tmp2->global_decl==true){
+					printf("\nECRASEMENT VALEUR GLOBALE\n");
+
+					a=tmp2->offset;
+					printf("VALEUR DE L'OFFSET %d\n",a);
+					create_inst_lui(r2,0x1001);
+					create_inst_sw(r1,a,r2);
+					} else {
+					printf("\nCHANGEMENT VALEUR DE VARIABLE LOCALE\n");
+					create_inst_sw(r1, tmp2->offset, 29);}
+
+					//quand c'est variable locale
+					liberer_reg(flagR1);
+
+
 			}
 			else{
 				declaration_affectation(root);
 			}
+
+			//liberer_reg(flagR2);
+
 			break;
 
 
@@ -119,7 +157,7 @@ void gen_code_passe_2(node_t root) {
 
 			gen_code(root, root->nops);
 			//place à allouer en pile
-			create_inst_comment("desallocation variables locales");
+			//create_inst_comment("desallocation variables locales");
 			create_inst_stack_deallocation(root->offset + get_temporary_max_offset());
 			break;
 
@@ -144,12 +182,12 @@ void gen_code_passe_2(node_t root) {
 
 					else { if(root->opr[1]->nature == NODE_IDENT){
 							//declaration et affectation
-							create_inst_comment("declaration - affectation");
+							//create_inst_comment("declaration - affectation");
 							declaration_affectation(root);
 					
 						} else {
 						//nouvelle déclaration
-							create_inst_comment("declaration");
+							//create_inst_comment("declaration");
 							if(reg_available()){
 								allocate_reg();
 								create_inst_ori(get_current_reg()-1,0x0, root->opr[1]->value);
@@ -173,7 +211,7 @@ void gen_code_passe_2(node_t root) {
 		case NODE_STRINGVAL:
 
 				//printf("CREATION PRINT PR STRING\n");
-				create_inst_comment("PRINT");
+				//create_inst_comment("PRINT");
 				create_inst_lui(4,0x1001);
     			create_inst_ori(4,4,aff);
     			create_inst_ori(2,0,0x4);
@@ -200,13 +238,22 @@ void gen_code_passe_2(node_t root) {
 			printf("GLOBALE?: %d\n",tmp2->global_decl);
 
 			if(root->opr[0]->nature == NODE_IDENT && (root->opr[1]->nature == NODE_INTVAL || root->opr[1]->nature == NODE_BOOLVAL)){
-				printf("ident + intval\n");
+				printf(" intval + ident\n");
+
 				tmp3=updateTMP(tmp3,root,0,r1);
 				create_inst_ori(r2, get_r0(), root->opr[1]->value);
 				ope_binaire(root,r1,r2);
 				
-			}
-			else if(root->opr[0]->nature == NODE_IDENT && root->opr[1]->nature == NODE_IDENT){
+			} else if (root->opr[1]->nature == NODE_IDENT && (root->opr[0]->nature == NODE_INTVAL || root->opr[0]->nature == NODE_BOOLVAL)){
+				printf("ident + intval\n");
+				create_inst_ori(r1, get_r0(), root->opr[0]->value);
+				tmp3=updateTMP(tmp3,root,1,r2);
+				ope_binaire(root,r1,r2);
+
+
+
+
+			}else if(root->opr[0]->nature == NODE_IDENT && root->opr[1]->nature == NODE_IDENT){
 				printf("ident + ident\n");
 				tmp3=updateTMP(tmp3,root,0,r1);
 				tmp4=updateTMP(tmp4,root,1,r2);
@@ -226,18 +273,44 @@ void gen_code_passe_2(node_t root) {
 
 			}
 			else{
-				gen_code_passe_2(root->opr[1]);
-				gen_code_passe_2(root->opr[0]);
-				
-				//r1 = return_reg1(r1);
-				//r2 = return_reg2(r2);
-
-
-				create_inst_lw(r1, tmp2->offset, 29);
-				create_inst_addiu(r1, r1, root->opr[1]->value);
-				create_inst_sw(r1, tmp2->offset, 29);
 				liberer_reg(flagR1);
 				liberer_reg(flagR2);
+
+				
+				printf("NATURE PREMIER FILS DU DERNIER PLUS %s", node_nature2string(root->opr[0]->opr[0]->nature));
+				gen_code_passe_2(root->opr[0]);
+				flagenchainement=1;
+				r2 = return_reg2(r2);
+				gen_code_passe_2(root->opr[1]);
+
+				if (root->opr[1]->nature==NODE_INTVAL){
+					if (flagenchainement==1){
+						printf("\nDANS NODE INTVAL POUR L'ADDITION, LA VALEUR EST %ld\n", root->opr[1]->value);
+						create_inst_ori(r2, get_r0(), root->opr[1]->value);
+						ope_binaire(root,r1,r2);
+					}	
+				} else {
+
+					printf("\nDANS NODE IDENT POUR L'ADDITION");
+						
+						tmp6=updateTMP(tmp6, root->opr[0],0,r2);
+						ope_binaire(root,r1,r2);
+				}
+
+
+
+				
+
+
+				//r1 = return_reg1(r1);
+				//r2 = return_reg2(r2);
+				flagenchainement=0;
+				
+				//create_inst_lw(r1, tmp2->offset, 29);
+				//create_inst_addiu(r1, r1, root->opr[1]->value);
+				//create_inst_sw(r1, tmp2->offset, 29);
+				//liberer_reg(flagR1);
+				//liberer_reg(flagR2);
 
 			}
 			break;
@@ -347,7 +420,7 @@ void gen_code_passe_2(node_t root) {
 			break;
 		case NODE_FOR:
 			gen_code_passe_2(root->opr[0]);
-			create_inst_comment("debut label");				
+			//create_inst_comment("debut label");				
 			l1 = get_new_label();
 			printf("%d\n", l1);
 			create_inst_label(l1);
@@ -359,7 +432,7 @@ void gen_code_passe_2(node_t root) {
 			//printf("Nature [1] dans for: %s\n", node_nature2string(root->opr[2]->nature));
 			gen_code_passe_2(root->opr[2]);
 			//printf("Nature [1] dans for: %s\n", node_nature2string(root->opr[3]->nature));
-			create_inst_comment("retour au test de boucle");
+			//create_inst_comment("retour au test de boucle");
 			create_inst_j(l1);
 			create_inst_label(l2);
 			break;
@@ -386,37 +459,17 @@ void gen_code_passe_2(node_t root) {
 
 		case NODE_BNOT: case NODE_UMINUS: case NODE_NOT:
 
-
 			r1 = return_reg1(r1);
-			
 
 			if(root->opr[0]->nature == NODE_IDENT){
-				printf("ident + intval\n");
 				tmp3=updateTMP(tmp3,root,0,r1);
-				create_inst_ori(r2, get_r0(), root->opr[1]->value);
-				ope_unaire(root,r1,r2);
+				ope_unaire(root,r1);
 				
 			}
-			else if(root->opr[0]->nature == NODE_IDENT ){//ident ident
-				printf("ident + ident\n");
-				tmp3=updateTMP(tmp3,root,0,r1);
-				tmp4=updateTMP(tmp4,root,1,r2);
-
-				printf("IDENT TMP3 : %s ", tmp3->ident);
-				printf("IDENT TMP4 : %s\n", tmp4->ident); 
-				ope_unaire(root,r1,r2);
-			}
-
-			else if((root->opr[0]->nature == NODE_INTVAL){
-				printf("intval + intval\n");
+			else if(root->opr[0]->nature == NODE_INTVAL || root->opr[0]->nature == NODE_BOOLVAL){
 				create_inst_ori(r1, get_r0(), root->opr[0]->value);
-				create_inst_ori(r2, get_r0(), root->opr[1]->value);
-
-				ope_unaire(root,r1,r2);
-				
-
+				ope_unaire(root,r1);
 			}
-
 
 			break;
 
@@ -427,6 +480,18 @@ void gen_code_passe_2(node_t root) {
 			flagprint = 1 ;
 
 			break;
+
+
+			case NODE_INTVAL:
+/*
+			if (flagenchainement==1){
+				printf("\nDANS NODE INTVAL POUR L'ADDITION, LA VALEUR EST %ld\n", root->value);
+				create_inst_ori(r2, get_r0(), root->value);
+				ope_binaire(root,r1,r2);
+
+
+			}*/
+
 		default:
 			break;
 			
@@ -437,7 +502,7 @@ void gen_code_passe_2(node_t root) {
 
 void syscallExit(){
 
-		create_inst_comment("exit");
+		//create_inst_comment("exit");
 		create_inst_ori(2,0,10);
 		create_inst_syscall();
 }
@@ -452,9 +517,8 @@ void ajoutStrings(int nb){
 
 void ajoutInstancePrint(int emplacement){
 
-	create_inst_comment("PRINT");
+	//create_inst_comment("PRINT");
 	create_inst_lui(4,0x1001);
-	//printf("\nemplacement %d\n", emplacement);
     create_inst_ori(4,4,emplacement);
     create_inst_ori(2,0,0x4);
     create_inst_syscall();
@@ -559,10 +623,6 @@ void liberer_reg(bool drap){
 
 void ope_binaire(node_t root, int reg1 , int reg2){
 
-	//printf("\nNature : %s\n", node_nature2string(root->nature));
-	//printf("REG1 %d\n",reg1);
-	//printf("REG2 %d\n",reg2);
-
 switch (root->nature){
 
 	case NODE_PLUS:
@@ -600,20 +660,49 @@ switch (root->nature){
 	break;
 }
 
-	if(tmp2->global_decl==true){
-		printf("\nECRASEMENT VALEUR GLOBALE\n");
-
-		a=tmp2->offset;
-		printf("VALEUR DE L'OFFSET %d\n",a);
-		create_inst_lui(r2,0x1001);
-		create_inst_sw(r1,a,r2);
-	} else {
-	printf("\nCHANGEMENT VALEUR DE VARIABLE LOCALE\n");
-	create_inst_sw(r1, tmp2->offset, 29);}//quand c'est variable locale
-	liberer_reg(flagR1);
+	
 	liberer_reg(flagR2);
 
 };
+
+
+
+
+
+void ope_unaire(node_t root, int reg1){
+
+switch (root->nature){
+
+	case NODE_UMINUS:
+		create_inst_subu(r1, 0, r1);
+	break;
+
+	case NODE_BNOT: //pr les entiers
+		create_inst_nor(r1, 0, r1);
+	break;
+
+	case NODE_NOT: //pr les booleens
+		create_inst_xori(r1, r1,1);
+	break;
+	default:
+	break;
+}
+
+	if(tmp2->global_decl==true){
+		//printf("\nECRASEMENT VALEUR GLOBALE\n");
+
+		a=tmp2->offset;
+		//printf("VALEUR DE L'OFFSET %d\n",a);
+		create_inst_lui(r1,0x1001);
+		create_inst_sw(r1,a,r1);
+	} else {
+	//printf("\nCHANGEMENT VALEUR DE VARIABLE LOCALE\n");
+	create_inst_sw(r1, tmp2->offset, 29);}//quand c'est variable locale
+	liberer_reg(flagR1);
+
+};
+
+
 
 
 
