@@ -1,4 +1,3 @@
-
 #ifndef _PASSE_2_H_
 #define _PASSE_2_H_
 
@@ -18,7 +17,9 @@ int32_t return_reg1(int32_t r);
 int32_t return_reg2(int32_t r);
 void liberer_reg(bool drap);
 void ope_binaire(node_t root, int reg1 , int reg2);
-void ope_unaire(node_t root, int reg1);
 void gen_code(node_t node, int nops);
+node_t updateTMP(node_t tmp, node_t root, int i,int r);
+void ope_unaire(node_t root, int reg1);
 void identOp(node_t root,int r);
+
 #endif
