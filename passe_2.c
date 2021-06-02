@@ -12,25 +12,20 @@ int flagprint = 1;
 node_type dernier_type2 = TYPE_NONE;
 node_t tmp1;
 node_t tmp2;
-node_t tmp3;
-node_t tmp4;
-node_t tmp5;
-node_t tmp6;
+
 int32_t reg_to_free;
 int32_t a;
 int32_t b;
 int r1;
 int r2;
-int r3;
-int gloc = 0;
+
 bool flagR1 = false;
 bool flagR2 = false;
 int OPR=0;
 int calcul=0;
-int flagenchainement = 0;
+
 int value;
-int offsetFunc = 0;
-//int flagp3 = 0;
+
 
 void gen_code_passe_2(node_t root) {
 
@@ -44,7 +39,6 @@ void gen_code_passe_2(node_t root) {
 		switch(root->nature){
 
 			case NODE_PROGRAM:
-
 				create_program();
 				create_inst_data_sec(); 
 				flagp2 = 1; //global
@@ -54,53 +48,57 @@ void gen_code_passe_2(node_t root) {
 				create_inst_text_sec();
 				gen_code_passe_2(root->opr[1]);
 				syscallExit();
-				break;
+			break;
 
 			case NODE_BLOCK:
 				gen_code(root, root->nops);
-				break;
+			break;
 
 		case NODE_IDENT: 
-			printf("ident dans le ident : %s\n", root->ident);
+
 			if(flagp2==0 && strcmp(root->ident, "main")!=0){ //Si dans func
-				printf("off av : %d\n", root->offset);
-				if(root->decl_node){
-					printf("est déclarée en globale\n");
+
+				if(root->decl_node){ 
 					tmp2 = root->decl_node;
-					printf("off ap : %d\n", tmp2->offset);
 				} else { 
 					tmp2 = root;
 				} 
 			
 
 				if (calcul==1){
-					printf("on est dans un calcul\n");
+				
 					if(OPR==1){
 						r2=return_reg1(r2);
 						identOp(tmp2,r2);
+
 					} else if(OPR==0){
+
 						r1=return_reg1(r1);
 						identOp(tmp2,r1);
 						ope_binaire(tmp2,r2,r1);
 						liberer_reg(flagR1);
+
 					}
 				}
-				else{
-					printf("on n'est pas dans un calcul\n");
-					//r2 = return_reg2(r2);
-					//identOp(tmp2, r2);
-				}
+
+
+              	printf("DANS NODE IDENT %s\n", root->ident);
 				if(flagprint==0 ){
 				
 					if(tmp2->global_decl==true){
+
 						create_inst_lui(4,0x1001);
 						create_inst_lw(4,tmp2->offset,4);
 						create_inst_ori(2,0,0x1);
 						create_inst_syscall();  
+
 					} else {
+
 						create_inst_lw(4,tmp2->offset,29);
 						create_inst_ori(2,0,0x1);
-						create_inst_syscall();
+						create_inst_syscall();  
+
+
 					}
 
 				} 
@@ -112,9 +110,11 @@ void gen_code_passe_2(node_t root) {
 		case NODE_AFFECT:
 
 			tmp2 = root->opr[0];
+
 			if(root->decl_node){ //Si variable globale
 				tmp2 = root->opr[0]->decl_node;
 			}
+
 
 			if(root->opr[0]->nature == NODE_IDENT && root->opr[1]->nature == NODE_IDENT){
 					affectation(root);
@@ -128,12 +128,24 @@ void gen_code_passe_2(node_t root) {
 				calcul=0;
 				gen_code_passe_2(root->opr[0]);
 
+
+
+					
+
+
 				if(tmp2->global_decl==true){
+					printf("\nECRASEMENT VALEUR GLOBALE\n");
+
 					a=tmp2->offset;
+					printf("VALEUR DE L'OFFSET %d\n",a);
 					create_inst_lui(r1,0x1001);
 					create_inst_sw(r2,a,r1);
 					} else {
+					printf("\nCHANGEMENT VALEUR DE VARIABLE LOCALE\n");
 					create_inst_sw(r2, tmp2->offset, 29);}
+
+					//quand c'est variable locale
+					//liberer_reg(flagR1);
 					liberer_reg(flagR2);
 				
 
@@ -145,10 +157,14 @@ void gen_code_passe_2(node_t root) {
 					
 
 				if(tmp2->global_decl==true){
+					printf("\nECRASEMENT VALEUR GLOBALE\n");
+
 					a=tmp2->offset;
+					printf("VALEUR DE L'OFFSET %d\n",a);
 					create_inst_lui(r1,0x1001);
 					create_inst_sw(r2,a,r1);
 					} else {
+					printf("\nCHANGEMENT VALEUR DE VARIABLE LOCALE\n");
 					create_inst_sw(r2, tmp2->offset, 29);}
 					liberer_reg(flagR2);
 					liberer_reg(flagR1);
@@ -178,13 +194,9 @@ void gen_code_passe_2(node_t root) {
 			create_inst_stack_deallocation(root->offset + get_temporary_max_offset());
 			break;
 
-		case NODE_LIST:
+		case NODE_LIST: case NODE_DECLS:
 				gen_code(root, root->nops);
-			break;
-
-		case NODE_DECLS:
-				gen_code(root, root->nops);
-			break;
+		break;
 
 		case NODE_DECL:
 
@@ -193,6 +205,7 @@ void gen_code_passe_2(node_t root) {
 				if(root->opr[0] != NULL && root->opr[1] != NULL){
 
 					if(flagp2 == 1){
+						printf("AZRHBARBAZRBAZRBAEB\n");
 						create_inst_word(root->opr[0]->ident, root->opr[1]->value);
 						aff=aff+4;
 					}
@@ -214,15 +227,24 @@ void gen_code_passe_2(node_t root) {
 						}			
 					}
 
-			}
+				}
+				else{
+					if(root->opr[0] != NULL && root->opr[1] == NULL){
+						if(flagp2 == 1){
+							
+							create_inst_word(root->opr[0]->ident, 0);
+							aff=aff+4;
+						}
+					}
+				}
+			printf("TEST\n");
 			gen_code(root, root->nops);
 
-			break;
+		break;
+
 		case NODE_TYPE:
 			dernier_type2 = root->type;
-			break;
-
-
+		break;
 
 		case NODE_STRINGVAL:
 
@@ -240,13 +262,13 @@ void gen_code_passe_2(node_t root) {
 		case NODE_INTVAL: case NODE_BOOLVAL:
 		value = root->value;
 		if(calcul==1){
+				printf("VALEUR INTVAL %ld \n", root->value);
 				if(OPR){
-					printf("là\n");
 					r2=return_reg1(r2);
 					create_inst_ori(r2,get_r0(),root->value);
 
 				} else if(OPR==0){
-					printf("ici\n");
+
 					r1=return_reg1(r1);
 					create_inst_ori(r1,get_r0(),root->value);
 					ope_binaire(root,r2,r1);
@@ -257,7 +279,10 @@ void gen_code_passe_2(node_t root) {
 		}
 		break;
 
-		case NODE_PLUS: case NODE_MINUS: case NODE_BAND: case NODE_AND: case NODE_OR: case NODE_BXOR: case NODE_SRL: case NODE_SLL: case NODE_SRA: case NODE_BOR:
+		
+
+		case NODE_PLUS: case NODE_MINUS: case NODE_BAND: case NODE_AND: case NODE_OR: case NODE_BXOR: case NODE_SRL: case NODE_SLL: case NODE_SRA: case NODE_BOR: case NODE_MUL: case NODE_DIV:case NODE_MOD:
+				
 				calcul=1;
 				OPR=1;
 				gen_code_passe_2(root->opr[0]);
@@ -269,35 +294,24 @@ void gen_code_passe_2(node_t root) {
 			break;
 
 	
-		case NODE_MUL:
-
-			break;
-		case NODE_DIV:
-
-			break;
-		case NODE_MOD:
-		
-			break;
 		case NODE_IF:
-		l1 = get_new_label();
-		printf("%d\n", l1);
-		l2 = get_new_label();
-		gen_code_passe_2(root->opr[0]);
-		create_inst_beq(r2, 0, l1);
-		if(root->opr[1] != NULL){
-			gen_code_passe_2(root->opr[1]);
-		}
-		create_inst_j(l2);
-		create_inst_label(l1);
+			l1 = get_new_label();
+			printf("%d\n", l1);
+			l2 = get_new_label();
+			gen_code_passe_2(root->opr[0]);
+			create_inst_beq(r2, 0, l1);
+			if(root->opr[1] != NULL){
+				gen_code_passe_2(root->opr[1]);
+			}
+			create_inst_j(l2);
+			create_inst_label(l1);
 
-		if(root->opr[2] != NULL){
-			gen_code_passe_2(root->opr[2]);
-		}
-		/*if(root->opr[3] != NULL){
-			gen_code_passe_2(root->opr[3]);
-		}*/
-		
-		create_inst_label(l2);
+			if(root->opr[2] != NULL){
+				gen_code_passe_2(root->opr[2]);
+			}
+
+			
+			create_inst_label(l2);
 			break;
 		case NODE_WHILE:
 			l1 = get_new_label();
@@ -310,19 +324,25 @@ void gen_code_passe_2(node_t root) {
 			create_inst_j(l1);
 			create_inst_label(l2);
 			break;
+
 		case NODE_FOR:
-			gen_code_passe_2(root->opr[0]);				
+			gen_code_passe_2(root->opr[0]);
+			create_inst_comment("Debut label");				
 			l1 = get_new_label();
 			printf("%d\n", l1);
 			create_inst_label(l1);
 			l2 = get_new_label();
+
 			gen_code_passe_2(root->opr[1]);
 			create_inst_beq(r2, 0, l2);
+			liberer_reg(flagR1);
 			gen_code_passe_2(root->opr[3]);
-			
+
 			gen_code_passe_2(root->opr[2]);
+			create_inst_comment("Retour au test de boucle");
 			create_inst_j(l1);
-			create_inst_label(l2);		
+			create_inst_label(l2);
+		
 			break;
 		case NODE_DOWHILE:
 			l1 = get_new_label();
@@ -332,6 +352,8 @@ void gen_code_passe_2(node_t root) {
 			gen_code_passe_2(root->opr[1]);
 			create_inst_bne(r2, 0, l1);
 			break;
+		
+
 		case NODE_EQ: case NODE_NE: case NODE_GE: case NODE_LE: case NODE_GT: case NODE_LT:
 
 
@@ -345,12 +367,14 @@ void gen_code_passe_2(node_t root) {
 			break;
 
 		case NODE_BNOT: case NODE_UMINUS: case NODE_NOT:
-
+				if(root->nature==NODE_UMINUS &&flagp2==1){
+					root->opr[0]->value=-root->opr[0]->value;
+				} else {
 				calcul=1;
 				OPR=1;
 				gen_code_passe_2(root->opr[0]);
 				OPR=0;
-				ope_unaire(root,r2);
+				ope_unaire(root,r2);}
 
 			break;
 
@@ -402,6 +426,8 @@ void affectation(node_t root){
 	if(reg_available()){
 		int regist = get_current_reg();
 		allocate_reg();
+		
+		printf("amelie bouffonne\n");
 		create_inst_lw(regist, a, 29);
 		create_inst_sw(regist, b, 29);
 		release_reg();
@@ -409,6 +435,7 @@ void affectation(node_t root){
 	else{
 		reg_to_free = get_restore_reg();
 		push_temporary(reg_to_free);
+		printf("Bye1\n");
 		create_inst_lw(reg_to_free, a, reg_to_free);
 		create_inst_sw(reg_to_free, b, 29);
 		pop_temporary(reg_to_free);
@@ -422,6 +449,7 @@ void declaration_affectation(node_t root){
 		int regist = get_current_reg();
 		allocate_reg();
 		create_inst_lui(regist,0x1001);
+		printf("BQGQERG\n");
 		create_inst_lw(regist, a, regist);
 		create_inst_sw(regist, b, 29);
 		release_reg();
@@ -430,6 +458,7 @@ void declaration_affectation(node_t root){
 		reg_to_free = get_restore_reg();
 		push_temporary(reg_to_free);
 		create_inst_lui(reg_to_free, 0x1001);
+		printf("Bye3");
 		create_inst_lw(reg_to_free, a, reg_to_free);
 		create_inst_sw(reg_to_free, b, 29);
 		pop_temporary(reg_to_free);
@@ -553,6 +582,25 @@ switch (root->nature){
 		create_inst_sltu(reg1,0,reg1);
 	break;
 
+	case NODE_MUL: 
+
+		create_inst_mult(reg1,reg2);
+		create_inst_mflo(reg1);
+
+	break;
+
+	case NODE_DIV:
+		create_inst_div(reg1,reg2);
+		create_inst_teq(reg2,0);
+		create_inst_mflo(reg1);
+	break;
+
+	case NODE_MOD:
+		create_inst_div(reg1,reg2);
+		create_inst_teq(reg2,0);
+		create_inst_mfhi(reg1);	
+
+	break;
 	default:
 	break;
 }
@@ -610,10 +658,12 @@ node_t updateTMP(node_t tmp, node_t root,int i,int r){
 
 					a=tmp->offset;
 					create_inst_lui(r,0x1001);
+					printf("Bye5");
 					create_inst_lw(r,a,r);
 				} else {
 					//printf("GLOBAL FALSE\n");
 					recup_offset(root->opr[i], 1);
+					printf("Bye6");
 					create_inst_lw(r, a, 29);
 				}
 
@@ -624,14 +674,15 @@ node_t updateTMP(node_t tmp, node_t root,int i,int r){
 
 
 void identOp(node_t root,int r){
-	create_inst_comment("LOAD VARIABLE DE LA MEMOIRE");
-	printf("LOAD VARIABLE DE LA MEMOIRE\n");
-	if(root->global_decl==true){
-		create_inst_lui(r,0x1001);
-		create_inst_lw(r,root->offset,r);
-	} else {
-		create_inst_lw(r, root->offset, 29);
-	}
+	//create_inst_comment("LOAD VARIABLE DE LA MEMOIRE");
+				if(root->global_decl==true){
+					create_inst_lui(r,0x1001);
+					printf("LOL\n");
+					create_inst_lw(r,root->offset,r);
+				} else {
+					printf("LO3\n");
+					create_inst_lw(r, root->offset, 29);
+				}
 
 
 }
