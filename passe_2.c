@@ -136,10 +136,10 @@ void gen_code_passe_2(node_t root) {
 
 
 			case NODE_FUNC:
-				reset_temporary_max_offset();
+				reset_temporary_max_offset(); 		//reinitialise offset maximum des temporaires
 				create_inst_label_str(root->opr[1]->ident);
-				set_temporary_start_offset(root->offset);
-				create_inst_stack_allocation();
+				set_temporary_start_offset(root->offset); //definit offset de début des temporaires
+				create_inst_stack_allocation(); //crée une instruction d’allocation en pile
 				gen_code(root, root->nops);
 				create_inst_stack_deallocation(root->offset + get_temporary_max_offset());
 			break;
@@ -194,17 +194,17 @@ void gen_code_passe_2(node_t root) {
     			create_inst_ori(4,4,aff);
     			create_inst_ori(2,0,0x4);
     			create_inst_syscall();
-    			int taille= strlen(root->str);
+    			int taille= strlen(root->str);	//taille de la chaine de caracteres
     			aff=aff+taille-1;	
 			break;
 
 			case NODE_INTVAL: case NODE_BOOLVAL:
 				value = root->value;
-				if(calcul==1){
-					if(OPR){
+				if(calcul==1){		//si on effectue une operation
+					if(OPR){		//operande 1
 						r2=return_reg1(r2);
 						create_inst_ori(r2,get_r0(),root->value);
-					} else if(OPR==0){
+					} else if(OPR==0){	//operande 2
 						r1=return_reg1(r1);
 						create_inst_ori(r1,get_r0(),root->value);
 						ope_binaire(root,r2,r1);
@@ -216,33 +216,31 @@ void gen_code_passe_2(node_t root) {
 
 			case NODE_PLUS: case NODE_MINUS: case NODE_BAND: case NODE_AND: case NODE_OR: case NODE_BXOR: case NODE_SRL: case NODE_SLL: case NODE_SRA: case NODE_BOR: case NODE_MUL: case NODE_DIV:case NODE_MOD:
 				calcul=1;
-				OPR=1;
+				OPR=1;	//operande 1
 				gen_code_passe_2(root->opr[0]);
-				OPR=0;
+				OPR=0;	//operande 2
 				gen_code_passe_2(root->opr[1]);
-				ope_binaire(root,r2,r1);
+				ope_binaire(root,r2,r1); //on effectue une operation binaire
 			break;
 		
 			case NODE_IF:
 				l1 = get_new_label();
-				printf("%d\n", l1);
 				l2 = get_new_label();
 				gen_code_passe_2(root->opr[0]);
 				create_inst_beq(r2, 0, l1);
-				if(root->opr[1] != NULL){
+				if(root->opr[1] != NULL){ 	//inctructions du if
 					gen_code_passe_2(root->opr[1]);
 				}
 				create_inst_j(l2);
-				create_inst_label(l1);
+				create_inst_label(l1);		//instructions du else
 				if(root->opr[2] != NULL){
 					gen_code_passe_2(root->opr[2]);
 				}
-				create_inst_label(l2);
+				create_inst_label(l2);		//sortie du if
 			break;
 
 			case NODE_WHILE:
 				l1 = get_new_label();
-				printf("%d\n", l1);
 				create_inst_label(l1);
 				l2 = get_new_label();
 				gen_code_passe_2(root->opr[0]);
@@ -253,8 +251,7 @@ void gen_code_passe_2(node_t root) {
 			break;
 
 			case NODE_FOR:
-				gen_code_passe_2(root->opr[0]);
-				create_inst_comment("Debut label");				
+				gen_code_passe_2(root->opr[0]);			
 				l1 = get_new_label();
 				printf("%d\n", l1);
 				create_inst_label(l1);
@@ -274,8 +271,7 @@ void gen_code_passe_2(node_t root) {
 			case NODE_DOWHILE:
 				l1 = get_new_label();
 				create_inst_label(l1);
-				gen_code_passe_2(root->opr[0]);
-				
+				gen_code_passe_2(root->opr[0]);				
 				gen_code_passe_2(root->opr[1]);
 				create_inst_bne(r2, 0, l1);
 			break;			
@@ -286,18 +282,16 @@ void gen_code_passe_2(node_t root) {
 					gen_code_passe_2(root->opr[0]);
 					OPR=0;
 					gen_code_passe_2(root->opr[1]);
-					ope_binaire(root,r2,r1);
+					ope_binaire(root,r2,r1);	//operation unaire
 			break;
 
 			case NODE_BNOT: case NODE_UMINUS: case NODE_NOT:
-				if(root->nature==NODE_UMINUS &&flagp2==1){
-					root->opr[0]->value=-root->opr[0]->value;
-				} else {
+				if(flagp2 == 0){
 					calcul=1;
 					OPR=1;
 					gen_code_passe_2(root->opr[0]);
 					OPR=0;
-					ope_unaire(root,r2);
+					ope_unaire(root,r2); 	//operation unaire
 				}
 			break;
 
@@ -314,26 +308,26 @@ void gen_code_passe_2(node_t root) {
 	}
 }
 
-void syscallExit(){
+void syscallExit(){		//fonction d'exit
 	create_inst_ori(2,0,10);
 	create_inst_syscall();
 }
 
 
-void ajoutStrings(int nb){
+void ajoutStrings(int nb){	//ajout d'une chaine de caracteres
     for (int i =0;i<nb;i++){
         create_inst_asciiz(NULL,get_global_string(i));
     }
 }
 
-void ajoutInstancePrint(int emplacement){
+void ajoutInstancePrint(int emplacement){	//ajout d'une chaine de caracteres
 	create_inst_lui(4,0x1001);
     create_inst_ori(4,4,emplacement);
     create_inst_ori(2,0,0x4);
     create_inst_syscall();
 }
 
-void affectation(node_t root){
+void affectation(node_t root){		//fonction d'affectation, gestion registres
 	recup_offset(root->opr[1], 1);
 	recup_offset(root->opr[0], 2);
 	if(reg_available()){
@@ -352,7 +346,7 @@ void affectation(node_t root){
 	}
 }
 
-void declaration_affectation(node_t root){
+void declaration_affectation(node_t root){		//fonction declaration + affectation, gestion des registres
 	recup_offset(root->opr[1], 1);
 	recup_offset(root->opr[0], 2);
 	if(reg_available()){
@@ -373,7 +367,7 @@ void declaration_affectation(node_t root){
 	}
 }
 
-void recup_offset(node_t root, int32_t i){
+void recup_offset(node_t root, int32_t i){		//fonction de recuperation des offsets
 	node_t tmp1 = root->decl_node;
 	if(tmp1){
 		if(i==1)
@@ -386,22 +380,22 @@ void recup_offset(node_t root, int32_t i){
 	}
 }
 
-int32_t return_reg1(int32_t r){
+int32_t return_reg1(int32_t r){		//retourne registre r1 alloue
 	if(reg_available()){
 		r = get_current_reg();
 		allocate_reg();
-		flagR1 = true;
+		flagR1 = true;		//registre alloue normalement
 	}
 	else{
 		reg_to_free = get_restore_reg();
 		push_temporary(reg_to_free);
 		r = get_current_reg();
-		flagR1 = false;
+		flagR1 = false;		//registre alloue avec la pile
 	}
 	return r;
 }
 
-int32_t return_reg2(int32_t r){
+int32_t return_reg2(int32_t r){		//retourne registre r2 alloue
 	if(reg_available()){
 		r = get_current_reg();
 		allocate_reg();
@@ -416,7 +410,7 @@ int32_t return_reg2(int32_t r){
 	return r;
 }
 
-void liberer_reg(bool drap){
+void liberer_reg(bool drap){	//free le registre en fonction de comment il a été alloué
 	if(drap){
 		release_reg();
 	}
@@ -426,7 +420,7 @@ void liberer_reg(bool drap){
 }
 
 
-void ope_binaire(node_t root, int reg1 , int reg2){
+void ope_binaire(node_t root, int reg1 , int reg2){		//gestion des instructions pour les operations binaires
 
 	switch (root->nature){
 		case NODE_PLUS:
@@ -511,7 +505,7 @@ void ope_binaire(node_t root, int reg1 , int reg2){
 	}
 };
 
-void ope_unaire(node_t root, int reg1){
+void ope_unaire(node_t root, int reg1){		//gestion des instructions pour les opérations unaires
 	switch (root->nature){
 		case NODE_UMINUS:
 			create_inst_subu(reg1, 0, reg1);
@@ -530,32 +524,14 @@ void ope_unaire(node_t root, int reg1){
 	}
 };
 
-void gen_code(node_t node, int nops){
+void gen_code(node_t node, int nops){	//fonction de parcours de l'arbre en fonction du nombre de fils
 	for (int i = 0; i<nops; i++){
 		if(node->opr[i]){
 		gen_code_passe_2(node->opr[i]);}
 	}
 }
 
-node_t updateTMP(node_t tmp, node_t root,int i,int r){
-	tmp = root->opr[i];
-	if(tmp->decl_node){
-		tmp = root->opr[i]->decl_node;
-	}
-	if(tmp->global_decl==true){
-		a=tmp->offset;
-		create_inst_lui(r,0x1001);
-		printf("Bye5");
-		create_inst_lw(r,a,r);
-	} else {
-		recup_offset(root->opr[i], 1);
-		printf("Bye6");
-		create_inst_lw(r, a, 29);
-	}
-	return tmp;
-}
-
-void identOp(node_t root,int r){
+void identOp(node_t root,int r){		//instruction de load en fonction de si c'est global ou local
 	if(root->global_decl==true){
 		create_inst_lui(r,0x1001);
 		create_inst_lw(r,root->offset,r);
