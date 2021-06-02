@@ -1,13 +1,13 @@
-int  start = 8;
-int  end=9;
-
+int end = 8;
+int start = 6;
 void  main() {
-int i, s = start , e = end;
-int  sum = 0;
-for (i = s; i < e; i = i + 1) {
-sum = sum + i;
+int a=1;
+int b = 2;
+if(end > start){ 
+print("bye");
 }
-print("sum :", sum, "\n");
-
+else{
+print("hello");
+}
 }
 

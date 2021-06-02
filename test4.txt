@@ -1,0 +1,14 @@
+int end = 6;
+int start = 6;
+bool a = true;
+void  main() {
+int i = 9;
+print(i); 
+while(a && i>5){
+
+i = i-1;
+print("i dans la boucle : ", i);
+}
+print("stop");
+}
+
